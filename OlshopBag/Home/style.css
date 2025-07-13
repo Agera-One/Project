@@ -1,0 +1,38 @@
+.navbar {
+  background: transparent;
+  backdrop-filter: blur(200px);
+  background-color: rgba(0, 0, 0, .035);
+}
+
+.login-button {
+  font-size: 14px;
+  transition: 0.3s background-color;
+}
+
+.navbar-toggler {
+    font-size: 1.2rem;
+    border: none;
+}
+
+.navbar-toggler:focus, .btn-close:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+@media (min-width: 993px ) {
+  .navbar {
+    width: 50rem;
+  }
+}
+
+@media (max-width: 992px ) {
+  .navbar {
+    width: 35rem;
+  }
+}
+
+@media (max-width: 768px ) {
+  .navbar {
+    width: 30rem;
+  }
+}
