@@ -1,0 +1,44 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  /* background-color: #f0f0f0; */
+}
+ul .Shoes-Logo {
+  height: 1.2rem;
+  width: 1.2rem;
+}
+
+.Shoes-Icon {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.card {
+  border: none;
+}
+
+.card:hover {
+  box-shadow: 0 0 25px 7px rgba(0, 0, 0, 0.1);
+  transition: .25s;
+}
+
+.Shoes-Image {
+  background-color: #f0f0f0;
+}
+
+/* .card-body {
+  background-color: #f0f0f0;
+} */
+
+li .navbar-link:active {
+  color: #dc4c64;
+}
