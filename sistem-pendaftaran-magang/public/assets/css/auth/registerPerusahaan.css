@@ -1,0 +1,224 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    background: #f7fafc;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* Root Variables */
+:root {
+    --warna-gradasi-biru: linear-gradient(to right, #17a2b8, #2fd0e2);
+    --warna-biru-gelap: #17a2b8;
+    --warna-biru-muda: #29aebd;
+    --warna-gradasi-oren: linear-gradient(to right, #e74c3c, #f6a26c);
+    --warna-oren-gelap: #e74c3c;
+    --warna-oren-muda: #f27a5b;
+    --warna-putih-tua: #e1e5eb;
+    --warna-putih-muda: #f0f2f5;
+    --border-radius: 20px;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 48px 40px;
+    max-width: 600px;
+    width: 100%;
+    animation: fadeInScale 0.6s ease-out;
+}
+
+.icon-circle {
+    width: 64px;
+    height: 64px;
+    background: var(--warna-oren-gelap);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    animation: fadeInScale 0.5s ease-out 0.2s both;
+}
+
+.icon-circle svg {
+    width: 32px;
+    height: 32px;
+    fill: white;
+}
+
+h1 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+    animation: slideDown 0.6s ease-out 0.3s both;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 32px;
+    animation: slideDown 0.6s ease-out 0.3s both;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    animation: slideDown 0.5s ease-out both;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+label .required {
+    color: #e74c3c;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus
+textarea:focus {
+    outline: none;
+    border-color: var(--warna-oren-gelap);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.2);
+}
+
+input::placeholder,
+select::placeholder
+textarea::placeholder {
+    color: #999;
+}
+
+.info-box {
+    background: #ffe5e0;
+    border: 1px solid var(--warna-oren-gelap);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--warna-oren-gelap);
+    margin-bottom: 20px;
+    animation: slideDown 0.6s ease-out both;
+    transition: all 0.3s ease;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--warna-gradasi-oren);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+    width: 550px;
+    height: 550px;
+}
+
+.footer-link {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #666;
+}
+
+.footer-link a {
+    color: var(--warna-oren-gelap);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-container {
+        padding: 32px 24px;
+    }
+}

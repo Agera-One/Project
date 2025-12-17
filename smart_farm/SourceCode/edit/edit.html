@@ -1,0 +1,165 @@
+<?php
+require_once '../connection.php';
+
+if (isset($_GET['edit'])) {
+  $id = $_GET['edit'];
+
+  // Ambil data produk dari database berdasarkan 'no'
+  $query = "SELECT * FROM produk WHERE id = '$id'";
+  $sql = mysqli_query($connection, $query);
+  $result = mysqli_fetch_assoc($sql);
+
+  if (!$result) {
+    echo "Product not found.";
+    exit;
+  }
+
+  $code  = $result['kode'];
+  $name  = $result['nama'];
+  $unit  = $result['satuan'];
+  $price = $result['harga'];
+  $image = $result['gambar'];
+} else {
+  echo "No product specified for changing.";
+  exit;
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Product - Bootstrap Floating Label</title>
+  <link rel="stylesheet" href="edit.css">
+  <scrip src="edit.js" defer></scrip>
+  <!-- Bootstrap -->
+  <link href="../../Assets/Bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../Assets/Bootstrap/icons/bootstrap-icons.min.css">
+  <script src="../../Assets/Bootstrap/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <div class="card p-4">
+    <h3 class="text-center mb-4">Edit Product</h3>
+
+    <form enctype="multipart/form-data" id="editForm" class="needs-validation" novalidate>
+      <input type="hidden" name="id" value="<?= $id; ?>" />
+      <input type="hidden" name="action" value="edit" />
+
+      <!-- Code -->
+      <div class="form-group mb-2">
+        <span class="icon"><i class="bi bi-qr-code-scan"></i></i></span>
+        <label for="code">Code</label>
+        <input
+          type="text"
+          class="form-control"
+          id="code"
+          name="code"
+          value="<?= $code; ?>"
+          required />
+        <div class="invalid-feedback">Please enter the product code.</div>
+      </div>
+
+      <!-- Name -->
+      <div class="form-group mb-2">
+        <span class="icon"><i class="bi bi-box"></i></span>
+        <label for="name">Name</label>
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          name="name"
+          value="<?= $name; ?>"
+          required />
+        <div class="invalid-feedback">Please enter the product name.</div>
+      </div>
+
+      <!-- Unit -->
+      <div class="form-group mb-2">
+        <span class="icon"><i class="bi bi-boxes"></i></span>
+        <label for="unit">Unit</label>
+        <input
+          type="text"
+          class="form-control"
+          id="unit"
+          name="unit"
+          value="<?= $unit; ?>"
+          required />
+        <div class="invalid-feedback">Please enter the unit.</div>
+      </div>
+
+      <!-- Price -->
+      <div class="form-group mb-3">
+        <span class="icon"><i class="bi bi-currency-dollar"></i></span>
+        <label for="price">Price</label>
+        <input
+          type="number"
+          class="form-control"
+          id="price"
+          name="price"
+          value="<?= $price; ?>"
+          required />
+        <div class="invalid-feedback">Please enter the price.</div>
+      </div>
+
+      <!-- Image -->
+      <div class="mb-3">
+        <label for="image" class="form-label">Product Image</label>
+        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex gap-2 mt-5">
+        <button type="submit" class="btn btn-success w-50 rounded-2">Save</butto>
+          <button type="button" class="btn btn-primary w-50 rounded-2" onclick="window.location.href='../index/index.php'">Comeback</button>
+          <button type="button" class="btn btn-danger w-50 rounded-2" onclick="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+
+    <!-- Success Message -->
+    <div
+      id="message"
+      class="text-success fw-semibold mt-3 text-center d-none">
+      ✅ Changes saved successfully!
+    </div>
+  </div>
+
+  <!-- <scrip>
+    const form = document.getElementById("editForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.classList.add("was-validated");
+        return;
+      }
+
+      const formData = new FormData(form);
+
+      fetch("../process.php", {
+          method: "POST",
+          body: formData,
+        })
+        .then((response) => response.text())
+        .then((result) => {
+          console.log("Server response:", result);
+          message.classList.remove("d-none");
+          setTimeout(() => message.classList.add("d-none"), 4000);
+          form.classList.add("was-validated");
+        })
+        .catch((error) => console.error("Error:", error));
+    });
+
+    function cancelEdit() {
+      if (confirm("Cancel changes and go back?")) {
+        window.history.back();
+      }
+    }
+  </scrip> -->
+</body>
+
+</html>

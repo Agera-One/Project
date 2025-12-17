@@ -1,0 +1,53 @@
+.burgerBar {
+  min-height: 100vh;
+  background: #151515;
+  color: #fff;
+  padding-top: 20px;
+}
+
+.burgerBar a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  padding: 10px 20px;
+}
+
+.burgerBar a:hover {
+  background: #232323;
+  border-radius: 15px;
+}
+
+.sidebar {
+  min-height: 100vh;
+  background: #151515;
+  color: #fff;
+  padding-top: 20px;
+}
+
+.sidebar a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  padding: 10px 20px;
+}
+
+ .sidebar a:hover {
+  background: #232323;
+  border-radius: 15px;
+}
+
+div .card {
+  border-radius: 10px;
+  border: none;
+}
+
+.card .card-header {
+  background: #151515;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
