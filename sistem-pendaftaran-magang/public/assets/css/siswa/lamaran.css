@@ -1,0 +1,506 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    background: #f7fafc;
+    min-height: 100vh;
+}
+
+:root {
+    --warna-gradasi-biru: linear-gradient(to right, #17a2b8, #2fd0e2);
+    --warna-biru-gelap: #17a2b8;
+    --warna-biru-muda: #29aebd;
+    --warna-gradasi-oren: linear-gradient(to right, #e74c3c, #f6a26c);
+    --warna-oren-gelap: #e74c3c;
+    --warna-oren-muda: #f27a5b;
+}
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: #181818;
+    color: #fff;
+    padding: 24px 0;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    width: 45px;
+    height: 45px;
+    background: var(--warna-biru-gelap);
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.logo svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+}
+
+.user-profile {
+    padding: 24px 24px 0;
+    margin-top: auto;
+    border-top: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--warna-biru-gelap);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.profile-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Added transition for text glow effect */
+    transition: text-shadow 0.3s ease;
+}
+
+.user-profile:hover .profile-name {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.profile-email {
+    font-size: 13px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-header {
+    padding: 0 24px 24px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 20px 0;
+}
+
+.nav-item {
+    margin: 6px 12px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    color: #cbd5e1;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Added subtle background animation on hover */
+.nav-link::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.nav-link:hover::before {
+    left: 100%;
+}
+
+.nav-link:hover {
+    background-color: #313131;
+    color: #fff;
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+    background: var(--warna-gradasi-biru);
+    color: #fff;
+    box-shadow: 0 0px 28px var(--warna-biru-gelap),
+        0 0px 16px var(--warna-biru-muda);
+    transform: translateX(8px) scale(1.02);
+}
+
+.nav-link.active::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 4px;
+    height: 60%;
+    background: #fff;
+    border-radius: 0 4px 4px 0;
+    transform: translateY(-50%);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+}
+
+.nav-link:hover .nav-icon {
+    transform: scale(1.25) rotate(5deg);
+}
+
+.nav-link.active .nav-icon {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+}
+
+.container {
+    flex: 1;
+    padding: 35px;
+    overflow-x: auto;
+    margin-left: 260px;
+}
+
+.main-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 24px;
+    padding: 8px 0;
+    animation: fadeInUp 0.5s ease-out 0.2s both;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    color: #17a2b8;
+    transform: translateX(-5px);
+}
+
+.back-link svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.form-card {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.form-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 24px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+label .required {
+    color: #e74c3c;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--warna-biru-muda);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.2);
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+input[type="number"] {
+    position: relative;
+}
+
+.number-wrapper {
+    position: relative;
+}
+
+.increment-btn {
+    position: absolute;
+    right: 1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: calc(100% - 2px);
+    background: #f5f5f5;
+    border: none;
+    border-left: 1px solid #e0e0e0;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.increment-btn:hover {
+    background: #e0e0e0;
+}
+
+/* ==================== BAGIAN SKILLS YANG BARU & RAPHI ==================== */
+.skills-section {
+    margin-bottom: 24px;
+    animation: fadeInUp 0.6s ease-out both;
+}
+
+.skills-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 20px;
+    margin-top: 8px;
+}
+
+.skill-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 0;
+    transition: transform 0.2s ease;
+}
+
+.skill-item:hover {
+    transform: translateX(4px);
+}
+
+.skill-item input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--warna-oren-gelap);
+}
+
+.skill-item .skill-text {
+    user-select: none;
+    color: #333;
+}
+
+/* Responsif */
+@media (max-width: 900px) {
+    .skills-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== BUTTON ==================== */
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.btn {
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 400px;
+    height: 400px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: var(--warna-gradasi-biru);
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: #333;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+    background: #f5f5f5;
+}
+
+/* ==================== ANIMASI ==================== */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsif umum */
+@media (max-width: 768px) {
+    .header {
+        padding: 16px;
+    }
+    .container {
+        padding: 16px;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .button-group {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,52 @@
+body {
+  background: linear-gradient(135deg, #74ebd5, #acb6e5);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.card {
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Floating label group */
+.form-group {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 14px 14px 40px;
+  /* extra left padding for icon */
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+  background: #fff;
+}
+
+.form-group label {
+  position: relative;
+  top: 10px;
+  left: 40px;
+  color: #888;
+  pointer-events: none;
+  background: #fff;
+  padding: 0 10px;
+}
+
+/* Icon style */
+.form-group .icon {
+  position: absolute;
+  top: 47%;
+  left: 12px;
+  font-size: 18px;
+  margin-right: 10px;
+}

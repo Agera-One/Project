@@ -1,0 +1,234 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    background: #f7fafc;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Root Variables */
+:root {
+    --warna-gradasi-biru: linear-gradient(to right, #17a2b8, #2fd0e2);
+    --warna-biru-gelap: #17a2b8;
+    --warna-biru-muda: #29aebd;
+    --warna-gradasi-oren: linear-gradient(to right, #e74c3c, #f6a26c);
+    --warna-oren-gelap: #e74c3c;
+    --warna-oren-muda: #f27a5b;
+    --warna-putih-tua: #e1e5eb;
+    --warna-putih-muda: #f0f2f5;
+    --border-radius: 20px;
+}
+
+.container {
+    max-width: 900px;
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 48px;
+    animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 40px 32px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s border-color 0.5s;
+    text-align: center;
+    animation: fadeInUp 0.6s ease-out both;
+}
+
+.card.student {
+    animation-delay: 0.2s;
+}
+
+.card.company {
+    animation-delay: 0.3s;
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    transition: transform 0.3s ease;
+}
+
+.card.student .icon-circle {
+    background: #e0f4f7;
+}
+
+.card.company .icon-circle {
+    background: #ffe5e0;
+}
+
+.icon-circle svg {
+    width: 40px;
+    height: 40px;
+}
+
+.card.student svg {
+    fill: #17a2b8;
+}
+
+.card.company svg {
+    fill: #e74c3c;
+}
+
+.card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    min-height: 48px;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn:hover::after {
+    width: 400px;
+    height: 400px;
+}
+
+.btn-student {
+    background: var(--warna-gradasi-biru);
+    color: white;
+}
+
+.btn-company {
+    background: var(--warna-gradasi-oren);
+    color: white;
+}
+
+.footer-link {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+.footer-link a {
+    color: #17a2b8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .cards-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card.student:hover {
+    border: 1px solid var(--warna-biru-muda);
+}
+
+.card.company:hover {
+    border: 1px solid var(--warna-oren-muda);
+}
+
+.card:hover .icon-circle {
+    transform: scale(1.1) rotate(10deg);
+}
