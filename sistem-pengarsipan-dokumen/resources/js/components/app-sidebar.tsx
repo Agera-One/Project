@@ -1,4 +1,3 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -22,8 +21,6 @@ import {
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
-    BookOpen,
-    Folder,
     LayoutGrid,
     Clock,
     Star,
@@ -32,7 +29,8 @@ import {
     Archive,
     Share2
 } from 'lucide-react';
-import AppLogo from './app-logo';
+import AppLogo from '@/components/app-logo';
+import FileDropZone from '@/components/file-drop-zone';
 
 const mainNavItems: NavItem[] = [
     {
@@ -62,7 +60,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Archives',
-        href: archives (),
+        href: archives(),
         icon: Archive,
     },
     {
@@ -72,20 +70,13 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const handleFiles = (files: File[]) => {
+        console.log("File yang diunggah:", files);
+        files.forEach(file => {
+            console.log(file.name, file.size / 1024 + " KB");
+        });
+    };
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -105,7 +96,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <FileDropZone onFilesSelected={handleFiles} />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -7,12 +7,13 @@ export function SearchBar() {
         <div className={cn(
             'relative',
             'w-full',
+            'me-3'
         )}>
             <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
             <Input
                 type="search"
-                placeholder="Search..."
-                className="pl-8 pr-4 py-2 min-w-[1180px] w-full"
+                placeholder="Search Documents..."
+                className="pl-8 pr-4 py-2 min-w-80 w-full bg-sidebar"
             />
         </div>
     );
