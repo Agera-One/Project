@@ -11,7 +11,6 @@ interface CategoryCard {
     size: string
 }
 
-
 export default function DocumentCategory() {
     const categoryCard: CategoryCard[] = [
         {
@@ -72,7 +71,7 @@ export default function DocumentCategory() {
     return (
         <div className="xl:col-span-2 bg-sidebar p-6 border border-zinc-700/50 rounded-lg">
             <div className="flex items-center justify-between mb-9">
-                <h2 className="text-2xl font-semibold">Document Category</h2>
+                <h2 className="text-2xl font-semibold">Document Extension</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">

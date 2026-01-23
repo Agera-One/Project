@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->nullable()->constrained('category')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->foreignId('status_id')->nullable()->constrained('status')->cascadeOnDelete();
             $table->string('title');
             $table->integer('size');
