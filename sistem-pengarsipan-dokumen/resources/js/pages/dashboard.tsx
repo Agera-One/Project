@@ -4,8 +4,9 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import DocumentCategory from '@/components/document-category';
 import StorageDetail from '@/components/storage-detail';
-import RecentFilesList from '@/components/recent-files-list';
+import RecentDocumentsList from '@/components/recent-documents-list';
 import { DocumentStatus } from '@/components/document-status';
+import { DocumentData } from '@/types/document'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,7 +15,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard() {
+interface DashboardProps {
+    documents: DocumentData[]
+}
+
+export default function Dashboard({ documents }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -25,7 +30,7 @@ export default function Dashboard() {
                 <DocumentCategory />
                 <StorageDetail />
             </div>
-            <RecentFilesList />
+            <RecentDocumentsList documents={documents} />
         </AppLayout>
     );
 }
