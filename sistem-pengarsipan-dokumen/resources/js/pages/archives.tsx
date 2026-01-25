@@ -3,8 +3,8 @@ import { archives } from '@/routes'
 import { type BreadcrumbItem } from '@/types'
 import { Head } from '@inertiajs/react'
 import ListLayout from '@/components/list-layout'
-import { DocumentData } from '@/types/document'
-import { mapDocumentsToListItems } from '@/mappers/document.mapper'
+import { DocumentListItem } from '@/types/document-list'
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,17 +14,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 interface Props {
-    documents: DocumentData[]
+    documents: DocumentListItem[]
 }
 
 export default function Archives({ documents }: Props) {
-    const files = mapDocumentsToListItems(documents)
-
+    const files = documents;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Archives" />
             <div className="flex h-full flex-1 flex-col overflow-x-auto p-6">
-                <ListLayout files={files} />
+                <ListLayout documents={files} />
             </div>
         </AppLayout>
     )

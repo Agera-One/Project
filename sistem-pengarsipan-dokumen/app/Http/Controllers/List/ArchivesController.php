@@ -4,7 +4,6 @@ namespace App\Http\Controllers\List;
 
 use App\Http\Controllers\Base\BaseDocumentListController;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class ArchivesController extends BaseDocumentListController
 {

@@ -19,18 +19,18 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
-
     Route::get('/recently', RecentlyController::class)->name('recently');
     Route::get('/my-documents', MyDocumentsController::class)->name('myDocuments');
     Route::get('/starred', StarredController::class)->name('starred');
     Route::get('/archives', ArchivesController::class)->name('archives');
     Route::get('/trash', TrashController::class)->name('trash');
 
-    Route::resource('documents', DocumentController::class)
-        ->only(['create', 'store', 'edit', 'update', 'destroy']);
-
-    Route::post('documents/{document}/restore', [DocumentController::class, 'restore'])
-        ->name('documents.restore');
+    Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::patch('/documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
+    Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+    Route::post('/documents/{document}/restore', [DocumentController::class, 'restore'])->name('documents.restore');
+    Route::patch('/documents/{document}/star', [DocumentController::class, 'toggleStar'])->name('documents.star');
+    Route::patch('/documents/{document}/archive', [DocumentController::class, 'toggleArchive'])->name('documents.archive');
 });

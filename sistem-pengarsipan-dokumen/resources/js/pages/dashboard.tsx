@@ -6,7 +6,7 @@ import DocumentCategory from '@/components/document-category';
 import StorageDetail from '@/components/storage-detail';
 import RecentDocumentsList from '@/components/recent-documents-list';
 import { DocumentStatus } from '@/components/document-status';
-import { DocumentData } from '@/types/document'
+import { DocumentListItem } from '@/types/document-list';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface DashboardProps {
-    documents: DocumentData[]
+    documents: DocumentListItem[]
 }
 
 export default function Dashboard({ documents }: DashboardProps) {

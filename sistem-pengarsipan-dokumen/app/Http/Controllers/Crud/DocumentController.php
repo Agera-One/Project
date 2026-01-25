@@ -12,10 +12,12 @@ use App\Http\Controllers\Controller;
 
 class DocumentController extends Controller
 {
-    public function create()
+    public function show(Documents $document)
     {
-        return Inertia::render('Documents/Create', [
-            'statuses'   => Status::select('id', 'status_name')->get(),
+        $this->authorize('view', $document);
+
+        return Inertia::render('documents/show', [
+            'document' => $document,
         ]);
     }
 
@@ -68,16 +70,6 @@ class DocumentController extends Controller
         return back()->withErrors(['files' => implode('; ', $errors) ?: 'Tidak ada file yang berhasil diunggah']);
     }
 
-    public function edit(Documents $document)
-    {
-        $this->authorize('update', $document);
-
-        return Inertia::render('Documents/Edit', [
-            'document'   => $document,
-            'statuses'   => Status::select('id', 'status_name')->get(),
-        ]);
-    }
-
     public function update(Request $request, Documents $document)
     {
         $this->authorize('update', $document);
@@ -104,7 +96,7 @@ class DocumentController extends Controller
 
         $document->update($validated);
 
-        return redirect()->route('myDocuments')->with('success', 'Dokumen berhasil diperbarui');
+        return redirect()->route('myDocuments')->with('success', 'Document updated successfully');
     }
 
     public function destroy(Documents $document)
@@ -126,5 +118,25 @@ class DocumentController extends Controller
         $document->restore();
 
         return back()->with('success', 'Dokumen berhasil dipulihkan');
+    }
+
+    public function toggleStar(Documents $document)
+    {
+        $this->authorize('update', $document);
+
+        $document->is_starred = ! $document->is_starred;
+        $document->save();
+
+        return back();
+    }
+
+    public function toggleArchive(Documents $document)
+    {
+        $this->authorize('update', $document);
+
+        $document->is_archived = ! $document->is_archived;
+        $document->save();
+
+        return back();
     }
 }

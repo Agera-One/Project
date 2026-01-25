@@ -1,7 +1,7 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SearchBar } from '@/components/ui/search-bar';
 import ButtonGroup from '@/components/ui/button-gruop';
-import { SortMenu } from '@/components/sort-menu';
+import { DropdownMenuRadioIcons } from '@/components/dropdown-menu-radio-icons';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
@@ -19,7 +19,7 @@ export function AppSidebarHeader({
             <div className="ml-auto flex items-center gap-2">
                 <SearchBar />
                 <ButtonGroup />
-                <SortMenu />
+                <DropdownMenuRadioIcons />
             </div>
         </header>
     );

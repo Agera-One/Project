@@ -1,30 +1,29 @@
 import AppLayout from '@/layouts/app-layout'
-import { trash } from '@/routes'
+import { starred } from '@/routes'
 import { type BreadcrumbItem } from '@/types'
 import { Head } from '@inertiajs/react'
 import ListLayout from '@/components/list-layout'
-import { DocumentData } from '@/types/document'
-import { mapDocumentsToListItems } from '@/mappers/document.mapper'
+import { DocumentListItem } from '@/types/document-list'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Trash',
-        href: trash().url,
+        title: 'Starred',
+        href: starred().url,
     },
 ]
 
 interface Props {
-    documents: DocumentData[]
+    documents: DocumentListItem[]
 }
 
-export default function Trash({ documents }: Props) {
-    const files = mapDocumentsToListItems(documents)
+export default function Starred({ documents }: Props) {
+    const files = documents
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Trash" />
+            <Head title="Starred" />
             <div className="flex h-full flex-1 flex-col overflow-x-auto p-6">
-                <ListLayout files={files} />
+                <ListLayout documents={files} />
             </div>
         </AppLayout>
     )
