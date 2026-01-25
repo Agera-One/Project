@@ -11,7 +11,7 @@ class Documents extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'documents';
+protected $table = 'documents';
 
     protected $fillable = [
         'user_id',
@@ -44,6 +44,13 @@ class Documents extends Model
             'application/vnd.ms-powerpoint' => 'ppt',
             default => pathinfo($this->original_name ?? '', PATHINFO_EXTENSION) ?: 'unknown',
         };
+    }
+
+    public function getFileUrlAttribute(): ?string
+    {
+        return $this->file_path
+            ? \Storage::disk('public')->url($this->file_path)
+            : null;
     }
 
     public function user(): BelongsTo

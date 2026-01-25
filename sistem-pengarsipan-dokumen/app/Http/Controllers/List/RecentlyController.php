@@ -4,7 +4,6 @@ namespace App\Http\Controllers\List;
 
 use App\Http\Controllers\Base\BaseDocumentListController;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class RecentlyController extends BaseDocumentListController
 {
@@ -12,6 +11,7 @@ class RecentlyController extends BaseDocumentListController
     {
         $query = $this->baseQuery($request)
             ->whereNull('deleted_at')
+            ->where('is_archived', false)
             ->where('updated_at', '>=', now()->subDays(30));
 
         return $this->render(

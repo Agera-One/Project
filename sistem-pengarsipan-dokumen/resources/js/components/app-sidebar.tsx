@@ -24,6 +24,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useState } from 'react';
+import AppLogo from './app-logo';
 
 const navItems = [
   { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
@@ -36,10 +37,13 @@ const navItems = [
 
 export function AppSidebar() {
   const page = usePage();
+  const { url } = usePage()
   const flash = page.props.flash as { success?: string; error?: string } | undefined;
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('');
+
+  const showUpload = !url.startsWith('/archives') && !url.startsWith('/trash');
 
   const handleFilesSelected = (files: File[]) => {
     if (files.length === 0) return;
@@ -104,7 +108,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href={dashboard()}>
-                <span className="font-bold text-lg">DocArchive</span>
+                <AppLogo className="inline-block h-6 w-6" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -156,8 +160,9 @@ export function AppSidebar() {
             )}
           </div>
         )}
-
-        <FileDropZone onFilesSelected={handleFilesSelected} />
+        {showUpload && (
+          <FileDropZone onFilesSelected={handleFilesSelected} />
+        )}
         <NavUser />
       </SidebarFooter>
     </Sidebar>
