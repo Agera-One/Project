@@ -15,7 +15,7 @@ class MyDocumentsController extends BaseDocumentListController
 
         return $this->render(
             $query,
-            'my-documents',
+            'user/my-documents',
             $request
         );
     }

@@ -15,7 +15,7 @@ class ArchivesController extends BaseDocumentListController
 
         return $this->render(
             $query,
-            'archives',
+            'user/archives',
             $request
         );
     }

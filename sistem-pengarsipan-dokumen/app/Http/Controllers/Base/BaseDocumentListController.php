@@ -11,14 +11,26 @@ abstract class BaseDocumentListController extends Controller
 {
     protected function baseQuery(Request $request)
     {
-        return Documents::with('status')
-            ->where('user_id', auth()->id())
+        $user = auth()->user();
+        $isAdmin = $user->role === 'admin';
+
+        $query = Documents::withTrashed()
+            ->with('user')
             ->when(
                 $request->filled('search'),
                 fn ($q) => $q
-                    ->where('title', 'like', '%' . $request->search . '%')
-                    ->orWhere('original_name', 'like', '%' . $request->search . '%')
+                    ->where(function ($qq) use ($request) {
+                        $qq->where('title', 'like', '%' . $request->search . '%')
+                           ->orWhere('original_name', 'like', '%' . $request->search . '%');
+                    })
             );
+
+        // Kalau bukan admin, filter hanya dokumen miliknya
+        if (! $isAdmin) {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query;
     }
 
     protected function render(
@@ -44,8 +56,9 @@ abstract class BaseDocumentListController extends Controller
             'id'          => $doc->id,
             'title'       => $doc->title,
             'size'        => (int) $doc->size,
-            'status'      => strtolower($doc->status?->status_name ?? 'active'),
+            'status'      => $doc->deleted_at ? 'deleted' : ($doc->is_archived ? 'archived' : 'active'),
             'updated_at'  => ($doc->updated_at ?? $doc->created_at)?->toIso8601String(),
+            'deleted_at'  => $doc->deleted_at?->toIso8601String(),
             'extension'   => strtolower(
                 pathinfo($doc->original_name ?? '', PATHINFO_EXTENSION) ?: 'unknown'
             ),
@@ -54,7 +67,11 @@ abstract class BaseDocumentListController extends Controller
             'file_url'    => $doc->file_path
                 ? Storage::url($doc->file_path)
                 : null,
+            'owner' => $doc->user ? [
+                'id'    => $doc->user->id,
+                'name'  => $doc->user->name,
+                'email' => $doc->user->email,
+            ] : null,
         ];
     }
-
 }

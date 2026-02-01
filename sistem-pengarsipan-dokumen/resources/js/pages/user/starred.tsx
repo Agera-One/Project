@@ -17,13 +17,11 @@ interface Props {
 }
 
 export default function Starred({ documents }: Props) {
-    const files = documents
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Starred" />
             <div className="flex h-full flex-1 flex-col overflow-x-auto p-6">
-                <ListLayout documents={files} />
+                <ListLayout documents={documents} />
             </div>
         </AppLayout>
     )
