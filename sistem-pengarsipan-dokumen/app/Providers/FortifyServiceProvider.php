@@ -2,16 +2,20 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use Laravel\Fortify\Features;
+use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Contracts\LoginResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
-use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -20,7 +24,20 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(LoginResponse::class, function () {
+            return new class implements LoginResponse {
+                public function toResponse($request)
+                {
+                    $user = auth()->user();
+
+                    return match ($user->role) {
+                        'admin' => redirect()->route('admin.dashboard'),
+                        'user'  => redirect()->route('dashboard'),
+                        default => redirect('/'),
+                    };
+                }
+            };
+        });
     }
 
     /**
@@ -31,7 +48,28 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->email)->first();
+
+            if (! $user) {
+                return null;
+            }
+
+            if (! $user->is_active) {
+                throw ValidationException::withMessages([
+                    'email' => 'This account has been disabled. Contact the admin.',
+                ]);
+            }
+
+            if (Hash::check($request->password, $user->password)) {
+                return $user;
+            }
+
+            return null;
+        });
     }
+
 
     /**
      * Configure Fortify actions.

@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import FileDropZone from '@/components/file-drop-zone';
-import { dashboard, recently, starred, myDocuments, archives, trash } from '@/routes';
+import { dashboard, recently, starred, myDocuments, archives, trash, account } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
   LayoutGrid,
@@ -22,11 +22,14 @@ import {
   Upload,
   CheckCircle2,
   AlertCircle,
+  UserRound,
 } from 'lucide-react';
 import { useState } from 'react';
 import AppLogo from './app-logo';
+import type { PageProps } from '@/types'
+import { route } from 'ziggy-js'
 
-const navItems = [
+const navItemsUser = [
   { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
   { title: 'Recently', href: recently(), icon: Clock },
   { title: 'Starred', href: starred(), icon: Star },
@@ -35,15 +38,29 @@ const navItems = [
   { title: 'Trash', href: trash(), icon: Trash2 },
 ];
 
+const navItemsAdmin = [
+  { title: 'Dashboard', href: route('admin.dashboard'), icon: LayoutGrid },
+  { title: 'Account', href: route('account'), icon: UserRound },
+  { title: 'Recently', href: route('admin.recently'), icon: Clock },
+  { title: 'Starred', href: route('admin.starred'), icon: Star },
+  { title: 'My Documents', href: route('admin.myDocuments'), icon: FileText },
+  { title: 'Archives', href: route('admin.archives'), icon: Archive },
+  { title: 'Trash', href: route('admin.trash'), icon: Trash2 },
+]
+
 export function AppSidebar() {
   const page = usePage();
-  const { url } = usePage()
   const flash = page.props.flash as { success?: string; error?: string } | undefined;
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('');
+  const { auth } = usePage<PageProps>().props
+  const user = auth?.user
 
-  const showUpload = !url.startsWith('/archives') && !url.startsWith('/trash');
+  const menuItems =
+    user?.role === 'admin'
+      ? navItemsAdmin
+      : navItemsUser
 
   const handleFilesSelected = (files: File[]) => {
     if (files.length === 0) return;
@@ -116,7 +133,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={navItems} />
+        <NavMain items={menuItems} />
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-4">
@@ -160,9 +177,7 @@ export function AppSidebar() {
             )}
           </div>
         )}
-        {showUpload && (
-          <FileDropZone onFilesSelected={handleFilesSelected} />
-        )}
+        <FileDropZone onFilesSelected={handleFilesSelected} />
         <NavUser />
       </SidebarFooter>
     </Sidebar>

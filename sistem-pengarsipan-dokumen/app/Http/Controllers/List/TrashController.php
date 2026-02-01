@@ -14,7 +14,7 @@ class TrashController extends BaseDocumentListController
 
         return $this->render(
             $query,
-            'trash',
+            'user/trash',
             $request,
             'deleted_at'
         );

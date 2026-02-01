@@ -17,6 +17,11 @@ return new class extends Migration
             $table->foreignId('status_id')->nullable()->constrained('status')->cascadeOnDelete();
             $table->string('title');
             $table->integer('size');
+            $table->string('file_path')->nullable()->after('title');
+            $table->string('mime_type')->nullable()->after('file_path');
+            $table->string('original_name')->nullable()->after('mime_type');
+            $table->boolean('is_starred')->default(false);
+            $table->boolean('is_archived')->default(false);
             $table->timestamps();
         });
     }

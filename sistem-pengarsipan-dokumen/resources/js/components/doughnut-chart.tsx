@@ -1,4 +1,3 @@
-// <DOCUMENT filename="doughnut-chart.tsx">
 import { useEffect, useRef } from 'react'
 import * as echarts from 'echarts/core'
 import {
@@ -88,27 +87,27 @@ export function DoughnutChart({ option, className = '' }: DoughnutChartProps) {
                     },
                     data: [
                         {
-                            value: 1048,
+                            value: 0,
                             name: 'DOCX'
                         },
                         {
-                            value: 735,
+                            value: 0,
                             name: 'XLSX'
                         },
                         {
-                            value: 580,
+                            value: 0,
                             name: 'PDF'
                         },
                         {
-                            value: 484,
+                            value: 0,
                             name: 'PPTX'
                         },
                         {
-                            value: 300,
+                            value: 0,
                             name: 'JPG'
                         },
                         {
-                            value: 300,
+                            value: 0,
                             name: 'PNG'
                         },
                     ],

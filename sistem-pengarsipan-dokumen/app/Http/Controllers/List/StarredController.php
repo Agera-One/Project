@@ -11,12 +11,11 @@ class StarredController extends BaseDocumentListController
     {
         $query = $this->baseQuery($request)
             ->whereNull('deleted_at')
-            ->where('is_archived', false)
             ->where('is_starred', true);
 
         return $this->render(
             $query,
-            'starred',
+            'user/starred',
             $request
         );
     }

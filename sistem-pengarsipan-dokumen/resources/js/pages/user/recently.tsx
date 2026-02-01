@@ -2,16 +2,13 @@ import AppLayout from '@/layouts/app-layout'
 import { recently } from '@/routes'
 import { Head } from '@inertiajs/react'
 import ListLayout from '@/components/list-layout'
-import { DocumentData } from '@/types/document'
-import { mapDocumentsToListItems } from '@/mappers/document.mapper'
+import { DocumentListItem } from '@/types/document-list';
 
 interface Props {
-    documents: DocumentData[]
+    documents: DocumentListItem[];
 }
 
 export default function Recently({ documents }: Props) {
-    const files = mapDocumentsToListItems(documents)
-
     return (
         <AppLayout
             breadcrumbs={[

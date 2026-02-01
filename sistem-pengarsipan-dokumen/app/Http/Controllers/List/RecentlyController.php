@@ -16,7 +16,7 @@ class RecentlyController extends BaseDocumentListController
 
         return $this->render(
             $query,
-            'recently',
+            'user/recently',
             $request
         );
     }
