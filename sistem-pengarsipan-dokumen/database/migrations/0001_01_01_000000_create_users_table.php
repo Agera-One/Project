@@ -17,9 +17,24 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Two factor columns
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
+
+            // Role enum
             $table->enum('role', ['admin', 'user'])->default('user');
-            $table->rememberToken();
-            $table->timestamps();
+
+            // Remember token (varchar 100)
+            $table->string('remember_token', 100)->nullable();
+
+            // timestamps nullable (sesuai gambar)
+            $table->timestamp('created_at')->nullable();
+            $table->timestamp('updated_at')->nullable();
+
+            // is_active tinyint(1) default 1
+            $table->boolean('is_active')->default(true);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
