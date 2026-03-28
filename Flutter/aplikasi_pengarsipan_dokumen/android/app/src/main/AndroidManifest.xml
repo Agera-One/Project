@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="aplikasi_pengarsiipan_dokumen"
+        android:label="Document Archiving"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

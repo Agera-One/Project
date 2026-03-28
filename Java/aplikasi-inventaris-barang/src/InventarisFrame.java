@@ -1,24 +1,21 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.*;
 
 public class InventarisFrame extends JFrame {
 
-    private JTextField tfKode, tfNama, tfStok, tfHarga;
-    private JTable table;
-    private DefaultTableModel model;
-    private BarangDAO dao = new BarangDAO();
+    JTextField tfKode, tfNama, tfStok, tfHarga;
+    JTable table;
+    DefaultTableModel model;
 
     public InventarisFrame() {
-        setTitle("Inventaris Barang - MySQL");
-        setSize(600, 400);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        init();
-        loadTable();
-    }
 
-    private void init() {
+        setTitle("Inventaris Barang");
+        setSize(600,400);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
         setLayout(new BorderLayout());
 
         JPanel form = new JPanel(new GridLayout(4,2));
@@ -30,87 +27,167 @@ public class InventarisFrame extends JFrame {
 
         form.add(new JLabel("Kode"));
         form.add(tfKode);
+
         form.add(new JLabel("Nama"));
         form.add(tfNama);
+
         form.add(new JLabel("Stok"));
         form.add(tfStok);
+
         form.add(new JLabel("Harga"));
         form.add(tfHarga);
 
         add(form, BorderLayout.NORTH);
 
         model = new DefaultTableModel(
-                new Object[]{"Kode","Nama","Stok","Harga"},0);
+                new String[]{"Kode","Nama","Stok","Harga"},0
+        );
+
         table = new JTable(model);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel btnPanel = new JPanel();
+        JPanel panelBtn = new JPanel();
+
         JButton btnTambah = new JButton("Tambah");
         JButton btnUpdate = new JButton("Update");
         JButton btnHapus = new JButton("Hapus");
 
-        btnPanel.add(btnTambah);
-        btnPanel.add(btnUpdate);
-        btnPanel.add(btnHapus);
+        panelBtn.add(btnTambah);
+        panelBtn.add(btnUpdate);
+        panelBtn.add(btnHapus);
 
-        add(btnPanel, BorderLayout.SOUTH);
+        add(panelBtn, BorderLayout.SOUTH);
 
-        btnTambah.addActionListener(e -> tambah());
-        btnUpdate.addActionListener(e -> update());
-        btnHapus.addActionListener(e -> hapus());
+        btnTambah.addActionListener(e -> tambahData());
+        btnUpdate.addActionListener(e -> updateData());
+        btnHapus.addActionListener(e -> hapusData());
 
         table.getSelectionModel().addListSelectionListener(e -> isiForm());
-    }
 
-    private void tambah() {
-        dao.insert(
-                tfKode.getText(),
-                tfNama.getText(),
-                Integer.parseInt(tfStok.getText()),
-                Double.parseDouble(tfHarga.getText())
-        );
         loadTable();
-        clear();
     }
 
-    private void update() {
-        dao.update(
-                tfKode.getText(),
-                tfNama.getText(),
-                Integer.parseInt(tfStok.getText()),
-                Double.parseDouble(tfHarga.getText())
-        );
-        loadTable();
-        clear();
-    }
+    void tambahData() {
 
-    private void hapus() {
-        dao.delete(tfKode.getText());
-        loadTable();
-        clear();
-    }
+        try {
 
-    private void loadTable() {
-        model.setRowCount(0);
-        for (String[] row : dao.getAll()) {
-            model.addRow(row);
+            Connection conn = Koneksi.getConnection();
+
+            String sql = "INSERT INTO barang VALUES(?,?,?,?)";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, tfKode.getText());
+            ps.setString(2, tfNama.getText());
+            ps.setInt(3, Integer.parseInt(tfStok.getText()));
+            ps.setDouble(4, Double.parseDouble(tfHarga.getText()));
+
+            ps.executeUpdate();
+
+            loadTable();
+            clearForm();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private void isiForm() {
+    void updateData() {
+
+        try {
+
+            Connection conn = Koneksi.getConnection();
+
+            String sql = "UPDATE barang SET nama=?,stok=?,harga=? WHERE kode=?";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, tfNama.getText());
+            ps.setInt(2, Integer.parseInt(tfStok.getText()));
+            ps.setDouble(3, Double.parseDouble(tfHarga.getText()));
+            ps.setString(4, tfKode.getText());
+
+            ps.executeUpdate();
+
+            loadTable();
+            clearForm();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void hapusData() {
+
+        try {
+
+            Connection conn = Koneksi.getConnection();
+
+            String sql = "DELETE FROM barang WHERE kode=?";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, tfKode.getText());
+
+            ps.executeUpdate();
+
+            loadTable();
+            clearForm();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void loadTable() {
+
+        model.setRowCount(0);
+
+        try {
+
+            Connection conn = Koneksi.getConnection();
+
+            Statement st = conn.createStatement();
+
+            ResultSet rs = st.executeQuery("SELECT * FROM barang");
+
+            while(rs.next()){
+
+                model.addRow(new Object[]{
+                        rs.getString("kode"),
+                        rs.getString("nama"),
+                        rs.getInt("stok"),
+                        rs.getDouble("harga")
+                });
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void isiForm(){
+
         int row = table.getSelectedRow();
-        if (row != -1) {
+
+        if(row != -1){
+
             tfKode.setText(model.getValueAt(row,0).toString());
             tfNama.setText(model.getValueAt(row,1).toString());
             tfStok.setText(model.getValueAt(row,2).toString());
             tfHarga.setText(model.getValueAt(row,3).toString());
+
         }
     }
 
-    private void clear() {
+    void clearForm(){
+
         tfKode.setText("");
         tfNama.setText("");
         tfStok.setText("");
         tfHarga.setText("");
     }
+
 }
