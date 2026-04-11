@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/auth_provider.dart';
 import '../providers/documents_provider.dart';
 import '../theme.dart';
 
@@ -15,13 +17,23 @@ class AppDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentIndex = ref.watch(currentScreenProvider);
     final state = ref.watch(documentsProvider);
+    final authState = ref.watch(authNotifierProvider);
+
+    // Ambil data user dari Supabase Auth
+    final user = Supabase.instance.client.auth.currentUser;
+    final fullName = user?.userMetadata?['full_name'] as String? ??
+        user?.email?.split('@').first ??
+        'Pengguna';
+    final email = user?.email ?? '';
+    final initials = user?.userMetadata?['initials'] as String? ??
+        _buildInitials(fullName);
 
     return Drawer(
       backgroundColor: kSurfaceColor,
       child: SafeArea(
         child: Column(
           children: [
-            // Logo header
+            // ── Logo header ──────────────────────────────
             Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
@@ -70,7 +82,7 @@ class AppDrawer extends ConsumerWidget {
             const Divider(color: kDividerColor, height: 1),
             const SizedBox(height: 8),
 
-            // Platform label
+            // ── Platform label ───────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               child: Align(
@@ -87,7 +99,7 @@ class AppDrawer extends ConsumerWidget {
               ),
             ),
 
-            // Nav items
+            // ── Nav Items ────────────────────────────────
             _NavItem(
               icon: Icons.grid_view_rounded,
               label: 'Home',
@@ -129,7 +141,7 @@ class AppDrawer extends ConsumerWidget {
               icon: Icons.inventory_2_outlined,
               label: 'Archives',
               index: 5,
-              badge: state.archivedDocuments.length > 0
+              badge: state.archivedDocuments.isNotEmpty
                   ? '${state.archivedDocuments.length}'
                   : null,
               currentIndex: currentIndex,
@@ -139,7 +151,7 @@ class AppDrawer extends ConsumerWidget {
               icon: Icons.delete_outline_rounded,
               label: 'Trash',
               index: 6,
-              badge: state.trashedDocuments.length > 0
+              badge: state.trashedDocuments.isNotEmpty
                   ? '${state.trashedDocuments.length}'
                   : null,
               currentIndex: currentIndex,
@@ -149,21 +161,22 @@ class AppDrawer extends ConsumerWidget {
             const Spacer(),
             const Divider(color: kDividerColor, height: 1),
 
-            // User profile
+            // ── User Profile + Logout ────────────────────
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(
                 children: [
+                  // Avatar
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: const BoxDecoration(
                       color: kOwnerAvatarColor,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
                       child: Text(
-                        'DP',
+                        initials,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 12,
@@ -173,20 +186,22 @@ class AppDrawer extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
+                  // Name & email
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Dzaki Prasetyo',
+                          fullName,
                           style: GoogleFonts.poppins(
                             color: kTextPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'dzakiprasetyo98@gmail.com',
+                          email,
                           style: GoogleFonts.poppins(
                             color: kTextTertiary,
                             fontSize: 10,
@@ -196,9 +211,45 @@ class AppDrawer extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.keyboard_arrow_up_rounded,
-                      color: kTextTertiary, size: 18),
                 ],
+              ),
+            ),
+
+            // ── Logout Button ────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: authState.isLoading
+                      ? null
+                      : () => _confirmLogout(context, ref),
+                  style: TextButton.styleFrom(
+                    backgroundColor: kPdfColor.withOpacity(0.08),
+                    foregroundColor: kPdfColor,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(
+                          color: kPdfColor.withOpacity(0.2), width: 1),
+                    ),
+                  ),
+                  icon: authState.isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              color: kPdfColor, strokeWidth: 2),
+                        )
+                      : const Icon(Icons.logout_rounded, size: 18),
+                  label: Text(
+                    'Logout',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -211,8 +262,65 @@ class AppDrawer extends ConsumerWidget {
     ref.read(currentScreenProvider.notifier).state = index;
     Navigator.of(context).pop();
   }
+
+  void _confirmLogout(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: kSurface2Color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Logout',
+          style: GoogleFonts.poppins(
+            color: kTextPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Apakah kamu yakin ingin keluar dari akun?',
+          style: GoogleFonts.poppins(color: kTextSecondary, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.poppins(color: kTextSecondary),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kPdfColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            onPressed: () async {
+              Navigator.pop(context); // tutup dialog
+              Navigator.pop(context); // tutup drawer
+              await ref.read(authNotifierProvider.notifier).signOut();
+            },
+            child: Text(
+              'Logout',
+              style: GoogleFonts.poppins(
+                  color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _buildInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+  }
 }
 
+// ── Nav Item Widget ───────────────────────────────────────────
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -237,7 +345,8 @@ class _NavItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
-        color: isActive ? kAccentGreen.withOpacity(0.1) : Colors.transparent,
+        color:
+            isActive ? kAccentGreen.withOpacity(0.1) : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
       ),
       child: ListTile(
@@ -257,7 +366,8 @@ class _NavItem extends StatelessWidget {
         ),
         trailing: badge != null
             ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
                   color: isActive
                       ? kAccentGreen.withOpacity(0.2)
@@ -276,7 +386,8 @@ class _NavItem extends StatelessWidget {
             : null,
         dense: true,
         visualDensity: VisualDensity.compact,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       ),
     );
   }
