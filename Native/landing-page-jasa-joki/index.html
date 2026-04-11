@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevForge — Jasa Joki Project</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #18181f;
+      --border: rgba(255,255,255,0.07);
+      --accent: #f5c842;
+      --accent2: #ff6b35;
+      --text: #f0eee8;
+      --muted: #7a7885;
+      --green: #4ade80;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 6vw;
+      background: rgba(10,10,15,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.5rem;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--accent); color: #000;
+      border: none; padding: 0.6rem 1.4rem;
+      border-radius: 6px; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(245,200,66,0.35); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 8rem 6vw 5rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); pointer-events: none;
+    }
+    .blob1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,200,66,0.12) 0%, transparent 70%);
+      top: -100px; right: -100px;
+      animation: float 8s ease-in-out infinite;
+    }
+    .blob2 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+      bottom: 50px; left: 10%;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2);
+      color: var(--accent); padding: 0.4rem 1rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+      width: fit-content;
+      animation: fadeUp 0.6s ease both;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.5s ease infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 6rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      max-width: 800px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero h1 .highlight {
+      color: var(--accent);
+      position: relative;
+      display: inline-block;
+    }
+    .hero h1 .highlight::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent); border-radius: 2px;
+      transform: scaleX(0); transform-origin: left;
+      animation: lineIn 0.5s 0.8s ease both;
+    }
+    @keyframes lineIn { to { transform: scaleX(1); } }
+
+    .hero-sub {
+      margin-top: 1.5rem;
+      font-size: 1.15rem; color: var(--muted);
+      max-width: 560px; line-height: 1.7;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .btn-primary {
+      background: var(--accent); color: #000;
+      padding: 0.9rem 2rem; border-radius: 8px;
+      font-weight: 700; font-size: 1rem; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(245,200,66,0.4); }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      padding: 0.9rem 2rem; border-radius: 8px;
+      font-weight: 600; font-size: 1rem; text-decoration: none;
+      border: 1px solid var(--border);
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      transition: border-color 0.2s, background 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); background: var(--surface); }
+
+    .hero-stats {
+      display: flex; gap: 3rem; margin-top: 4rem;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .stat-item { display: flex; flex-direction: column; }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 800; color: var(--text);
+    }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTION COMMON ─── */
+    section { padding: 6rem 6vw; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.8rem; display: block;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.02em; margin-bottom: 1rem;
+    }
+    .section-desc { color: var(--muted); max-width: 520px; font-size: 1.05rem; }
+
+    /* ─── SERVICES ─── */
+    .services { background: var(--surface); }
+    .services-header { margin-bottom: 3.5rem; }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .service-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+      cursor: default;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      transform: scaleX(0); transition: transform 0.4s;
+    }
+    .service-card:hover { border-color: rgba(245,200,66,0.25); transform: translateY(-4px); }
+    .service-card:hover::before { transform: scaleX(1); }
+
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1.2rem;
+      background: rgba(245,200,66,0.08);
+      border: 1px solid rgba(245,200,66,0.15);
+    }
+    .card-tag {
+      display: inline-block; background: rgba(245,200,66,0.1);
+      color: var(--accent); font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.25rem 0.6rem; border-radius: 4px;
+      margin-bottom: 0.6rem;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 700; margin-bottom: 0.8rem;
+    }
+    .card-desc { color: var(--muted); font-size: 0.92rem; line-height: 1.65; margin-bottom: 1.5rem; }
+
+    /* pricing tiers */
+    .tiers { display: flex; flex-direction: column; gap: 0.6rem; }
+    .tier {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 0.75rem 1rem; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      gap: 1rem;
+    }
+    .tier-info { flex: 1; }
+    .tier-name { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 0.2rem; }
+    .tier-features { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+    .tier-price {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; color: var(--accent);
+      font-size: 1rem; white-space: nowrap; flex-shrink: 0;
+    }
+    .tier.featured {
+      background: rgba(245,200,66,0.05);
+      border-color: rgba(245,200,66,0.25);
+    }
+    .tier.featured .tier-price { color: var(--accent); }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-header { margin-bottom: 3.5rem; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 2rem;
+      position: relative;
+    }
+    .step {
+      position: relative;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.5rem; font-weight: 800;
+      color: rgba(245,200,66,0.1);
+      line-height: 1;
+      transition: color 0.3s;
+    }
+    .step:hover .step-num { color: rgba(245,200,66,0.25); }
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 700;
+    }
+    .step-desc { color: var(--muted); font-size: 0.9rem; }
+
+    /* ─── WHY US ─── */
+    .why { background: var(--surface); }
+    .why-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .why-item {
+      display: flex; gap: 1rem;
+      padding: 1.5rem; border-radius: 12px;
+      background: var(--bg); border: 1px solid var(--border);
+      transition: border-color 0.3s;
+    }
+    .why-item:hover { border-color: rgba(245,200,66,0.2); }
+    .why-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+    .why-text h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .why-text p { color: var(--muted); font-size: 0.875rem; }
+
+    /* ─── CTA SECTION ─── */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(245,200,66,0.08) 0%, rgba(255,107,53,0.05) 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .cta-section .section-title { margin: 0 auto 1rem; max-width: 600px; }
+    .cta-section .section-desc { margin: 0 auto 2.5rem; }
+
+    /* ─── CONTACT ─── */
+    .contact-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+    }
+    .contact-info { margin-top: 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .contact-item {
+      display: flex; gap: 1rem; align-items: flex-start;
+      padding: 1.2rem; border-radius: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    .contact-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .contact-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .contact-value { font-weight: 600; color: var(--text); }
+    .contact-value a { color: var(--accent); text-decoration: none; }
+    .contact-value a:hover { text-decoration: underline; }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+    .form-input, .form-select, .form-textarea {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.8rem 1rem;
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem; transition: border-color 0.2s;
+      outline: none; width: 100%;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: rgba(245,200,66,0.5);
+    }
+    .form-textarea { resize: vertical; min-height: 120px; }
+    .form-select { appearance: none; cursor: pointer; }
+    .form-select option { background: var(--surface2); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .btn-submit {
+      background: var(--accent); color: #000;
+      border: none; padding: 1rem 2rem; border-radius: 8px;
+      font-weight: 700; font-size: 1rem; cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%; margin-top: 0.5rem;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(245,200,66,0.35); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* success state */
+    .form-success {
+      display: none; text-align: center; padding: 3rem 2rem;
+      background: rgba(74,222,128,0.05); border: 1px solid rgba(74,222,128,0.2);
+      border-radius: 12px;
+    }
+    .form-success.visible { display: block; }
+    .form-success h3 { font-family: 'Syne', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--green); }
+    .form-success p { color: var(--muted); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 2.5rem 6vw;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; color: var(--text);
+    }
+    .footer-logo span { color: var(--accent); }
+    .footer-copy { color: var(--muted); font-size: 0.85rem; }
+
+    /* ─── FLOATING WA BUTTON ─── */
+    .wa-float {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: #25D366; color: #fff;
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; text-decoration: none;
+      box-shadow: 0 8px 30px rgba(37,211,102,0.4);
+      z-index: 200;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: bounceIn 0.6s 1.5s ease both;
+    }
+    .wa-float:hover { transform: scale(1.1); box-shadow: 0 12px 40px rgba(37,211,102,0.6); }
+    @keyframes bounceIn {
+      from { opacity: 0; transform: scale(0); }
+      60% { transform: scale(1.2); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 5vw; }
+      .nav-links { display: none; }
+      .hero { padding: 7rem 5vw 4rem; }
+      .hero-stats { gap: 2rem; flex-wrap: wrap; }
+      section { padding: 4rem 5vw; }
+      .why-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .form-row { grid-template-columns: 1fr; }
+      footer { flex-direction: column; text-align: center; }
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Dev<span>Forge</span></div>
+  <ul class="nav-links">
+    <li><a href="#layanan">Layanan</a></li>
+    <li><a href="#proses">Proses</a></li>
+    <li><a href="#kontak">Kontak</a></li>
+  </ul>
+  <a href="#kontak" class="nav-cta">Pesan Sekarang</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob blob1"></div>
+  <div class="hero-blob blob2"></div>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Buka Order — Pengerjaan Cepat
+  </div>
+
+  <h1>
+    Jasa Joki<br>
+    <span class="highlight">Project</span><br>
+    Terpercaya
+  </h1>
+
+  <p class="hero-sub">
+    Dari tugas kuliah hingga proyek framework modern — kami kerjakan dengan rapi, tepat waktu, dan harga yang ramah di kantong mahasiswa.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#layanan" class="btn-primary">
+      Lihat Paket Harga ↓
+    </a>
+    <a href="https://wa.me/62882009259927" target="_blank" class="btn-ghost">
+      💬 Chat via WhatsApp
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num">50+</span>
+      <span class="stat-label">Proyek Selesai</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">5★</span>
+      <span class="stat-label">Rating Klien</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">24h</span>
+      <span class="stat-label">Respon Cepat</span>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="layanan">
+  <div class="services-header reveal">
+    <span class="section-label">Layanan Kami</span>
+    <h2 class="section-title">Pilih Paket Yang Sesuai</h2>
+    <p class="section-desc">Tersedia berbagai paket untuk setiap kebutuhan — dari tugas kuliah sampai proyek semester lengkap.</p>
+  </div>
+
+  <div class="services-grid">
+
+    <!-- DB -->
+    <div class="service-card reveal">
+      <div class="card-icon">🗄️</div>
+      <div class="card-tag">DB</div>
+      <div class="card-title">Database (DB)</div>
+      <div class="card-desc">Pembuatan database dari awal hingga diterima, siap digunakan untuk kebutuhan tugas atau proyek Anda.</div>
+      <div class="tiers">
+        <div class="tier featured">
+          <div class="tier-info">
+            <div class="tier-name">Paket Lengkap</div>
+            <div class="tier-features">Dari awal sampai diterima jadi · Semua kebutuhan database</div>
+          </div>
+          <div class="tier-price">Rp 30k</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PBO -->
+    <div class="service-card reveal">
+      <div class="card-icon">☕</div>
+      <div class="card-tag">PBO</div>
+      <div class="card-title">Pemrograman Berorientasi Objek</div>
+      <div class="card-desc">Proyek PBO dengan implementasi OOP yang benar. Tersedia opsi dengan penjelasan coding sampai paham.</div>
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-info">
+            <div class="tier-name">Proyek Saja</div>
+            <div class="tier-features">Output proyek selesai · Tanpa penjelasan</div>
+          </div>
+          <div class="tier-price">Rp 40k</div>
+        </div>
+        <div class="tier featured">
+          <div class="tier-info">
+            <div class="tier-name">Proyek + Premium</div>
+            <div class="tier-features">Tema/req sendiri · Penjelasan coding · Free revisi</div>
+          </div>
+          <div class="tier-price">Rp 80k</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEBP -->
+    <div class="service-card reveal">
+      <div class="card-icon">🌐</div>
+      <div class="card-tag">WEBP</div>
+      <div class="card-title">Web Programming (PHP/Laravel)</div>
+      <div class="card-desc">Website berbasis PHP atau Laravel dengan fitur lengkap. Tersedia dari paket dasar hingga full service.</div>
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-info">
+            <div class="tier-name">Website Saja</div>
+            <div class="tier-features">Harus punya tema, UI/UX, & database sendiri</div>
+          </div>
+          <div class="tier-price">Rp 50k</div>
+        </div>
+        <div class="tier">
+          <div class="tier-info">
+            <div class="tier-name">Website + Tema</div>
+            <div class="tier-features">Tema sesuai req + UI/UX dari kami</div>
+          </div>
+          <div class="tier-price">Rp 80k</div>
+        </div>
+        <div class="tier featured">
+          <div class="tier-info">
+            <div class="tier-name">Full Service</div>
+            <div class="tier-features">Tema + UI/UX + database dari kami + revisi gratis</div>
+          </div>
+          <div class="tier-price">Rp 100k</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRAM -->
+    <div class="service-card reveal">
+      <div class="card-icon">⚛️</div>
+      <div class="card-tag">FRAM</div>
+      <div class="card-title">Framework Modern (React/Vue/dll)</div>
+      <div class="card-desc">Website menggunakan framework modern seperti React, Vue, atau sejenisnya dengan kode terstruktur.</div>
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-info">
+            <div class="tier-name">Website Saja</div>
+            <div class="tier-features">Harus punya UI/UX & database sendiri</div>
+          </div>
+          <div class="tier-price">Rp 50k</div>
+        </div>
+        <div class="tier">
+          <div class="tier-info">
+            <div class="tier-name">Website + UI/UX</div>
+            <div class="tier-features">UI/UX dirancang dari kami</div>
+          </div>
+          <div class="tier-price">Rp 80k</div>
+        </div>
+        <div class="tier featured">
+          <div class="tier-info">
+            <div class="tier-name">Full Service</div>
+            <div class="tier-features">UI/UX + database dari kami + revisi gratis</div>
+          </div>
+          <div class="tier-price">Rp 100k</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOB -->
+    <div class="service-card reveal" style="grid-column: span 1;">
+      <div class="card-icon">📱</div>
+      <div class="card-tag">MOB</div>
+      <div class="card-title">Mobile App (Flutter / React Native)</div>
+      <div class="card-desc">Aplikasi mobile dari output website hingga APK yang bisa diinstall di semua perangkat Android.</div>
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-info">
+            <div class="tier-name">Output Website</div>
+            <div class="tier-features">Tanpa database · Pakai list, map & set · Harus punya fitur & UI/UX sendiri</div>
+          </div>
+          <div class="tier-price">Rp 50k</div>
+        </div>
+        <div class="tier">
+          <div class="tier-info">
+            <div class="tier-name">Website + Full</div>
+            <div class="tier-features">Output website + UI/UX & fitur dari kami + database Supabase</div>
+          </div>
+          <div class="tier-price">Rp 100k</div>
+        </div>
+        <div class="tier featured">
+          <div class="tier-info">
+            <div class="tier-name">Output APK Premium</div>
+            <div class="tier-features">File APK · Install semua Android · UI/UX + fitur dari kami · Supabase · Free revisi</div>
+          </div>
+          <div class="tier-price">Rp 130k</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="proses">
+  <div class="how-header reveal">
+    <span class="section-label">Alur Kerja</span>
+    <h2 class="section-title">Cara Pemesanan</h2>
+    <p class="section-desc">Proses yang mudah dan transparan dari awal hingga proyek selesai.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step reveal">
+      <div class="step-num">01</div>
+      <div class="step-title">Hubungi Kami</div>
+      <div class="step-desc">Chat via WhatsApp atau isi form di bawah. Ceritakan kebutuhan proyek Anda secara detail.</div>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">02</div>
+      <div class="step-title">Diskusi & Deal</div>
+      <div class="step-desc">Kami diskusikan scope pekerjaan, timeline, dan harga final sesuai kebutuhan Anda.</div>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">03</div>
+      <div class="step-title">Pembayaran DP</div>
+      <div class="step-desc">DP 50% di awal sebagai tanda jadi. Pelunasan setelah proyek selesai & diterima.</div>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">04</div>
+      <div class="step-title">Pengerjaan</div>
+      <div class="step-desc">Kami mulai mengerjakan dengan progress update berkala. Transparansi penuh selama pengerjaan.</div>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">05</div>
+      <div class="step-title">Revisi & Selesai</div>
+      <div class="step-desc">Paket tertentu include revisi gratis. Setelah diterima, pelunasan dan file diserahkan penuh.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why">
+  <div class="reveal">
+    <span class="section-label">Mengapa Kami</span>
+    <h2 class="section-title">Keunggulan DevForge</h2>
+  </div>
+  <div class="why-grid">
+    <div class="why-item reveal">
+      <div class="why-icon">⚡</div>
+      <div class="why-text">
+        <h3>Pengerjaan Cepat</h3>
+        <p>Deadline mepet? Kami siap bantu. Estimasi waktu diberikan sebelum deal, dan kami komitmen tepat waktu.</p>
+      </div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">💰</div>
+      <div class="why-text">
+        <h3>Harga Pelajar</h3>
+        <p>Harga dirancang khusus untuk kantong mahasiswa. Kualitas profesional dengan budget yang terjangkau.</p>
+      </div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">🔄</div>
+      <div class="why-text">
+        <h3>Revisi Gratis (Paket Tertentu)</h3>
+        <p>Paket premium sudah termasuk free revisi. Kami pastikan hasilnya sesuai ekspektasi Anda.</p>
+      </div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">📖</div>
+      <div class="why-text">
+        <h3>Penjelasan Coding</h3>
+        <p>Beberapa paket termasuk penjelasan alur kode sampai paham — bukan cuma copy-paste, tapi belajar.</p>
+      </div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">🔒</div>
+      <div class="why-text">
+        <h3>Aman & Terpercaya</h3>
+        <p>Sistem DP memastikan keamanan kedua pihak. File source code diserahkan penuh setelah lunas.</p>
+      </div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">🎯</div>
+      <div class="why-text">
+        <h3>Sesuai Kebutuhan</h3>
+        <p>Setiap proyek dikerjakan custom sesuai req Anda — bukan template asal tempel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section reveal">
+  <span class="section-label">Mulai Sekarang</span>
+  <h2 class="section-title">Siap Mulai Proyekmu?</h2>
+  <p class="section-desc">Jangan tunda lagi. Deadline mendekat? Chat kami sekarang dan dapatkan estimasi gratis.</p>
+  <br>
+  <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+    <a href="https://wa.me/62882009259927" target="_blank" class="btn-primary">💬 Chat WhatsApp</a>
+    <a href="#kontak" class="btn-ghost">📋 Isi Form Order</a>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="kontak">
+  <div class="contact-grid">
+    <div>
+      <span class="section-label">Kontak</span>
+      <h2 class="section-title">Hubungi Kami</h2>
+      <p class="section-desc">Siap membantu kebutuhan proyek Anda. Respon cepat dalam 24 jam.</p>
+
+      <div class="contact-info reveal">
+        <div class="contact-item">
+          <div class="contact-icon">💬</div>
+          <div>
+            <div class="contact-label">WhatsApp</div>
+            <div class="contact-value"><a href="https://wa.me/62882009259927" target="_blank">+62 882-0092-59927</a></div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📧</div>
+          <div>
+            <div class="contact-label">Email</div>
+            <div class="contact-value"><a href="mailto:dzakiprasetyo98@email.com">dzakiprasetyo98@email.com</a></div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">⏰</div>
+          <div>
+            <div class="contact-label">Jam Respon</div>
+            <div class="contact-value">Setiap hari, 08.00 – 23.59 WIB</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="contact-form" id="orderForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap</label>
+            <input class="form-input" type="text" placeholder="Nama kamu" id="inputNama">
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp Aktif</label>
+            <input class="form-input" type="text" placeholder="08xx-xxxx-xxxx" id="inputWa">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jenis Layanan</label>
+          <select class="form-select" id="inputLayanan">
+            <option value="" disabled selected>Pilih layanan...</option>
+            <option value="DB - Rp30k">DB — Rp 30.000</option>
+            <option value="PBO Proyek - Rp40k">PBO (Proyek Saja) — Rp 40.000</option>
+            <option value="PBO Premium - Rp80k">PBO (Premium) — Rp 80.000</option>
+            <option value="WEBP Basic - Rp50k">WEBP (Website Saja) — Rp 50.000</option>
+            <option value="WEBP + Tema - Rp80k">WEBP (+ Tema) — Rp 80.000</option>
+            <option value="WEBP Full - Rp100k">WEBP (Full Service) — Rp 100.000</option>
+            <option value="FRAM Basic - Rp50k">FRAM (Website Saja) — Rp 50.000</option>
+            <option value="FRAM + UI/UX - Rp80k">FRAM (+ UI/UX) — Rp 80.000</option>
+            <option value="FRAM Full - Rp100k">FRAM (Full Service) — Rp 100.000</option>
+            <option value="MOB Basic - Rp50k">MOB (Website Output) — Rp 50.000</option>
+            <option value="MOB + Supabase - Rp100k">MOB (+ Supabase) — Rp 100.000</option>
+            <option value="MOB APK Premium - Rp130k">MOB (APK Premium) — Rp 130.000</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deskripsi Proyek</label>
+          <textarea class="form-textarea" placeholder="Ceritakan kebutuhan proyekmu di sini — tema, fitur yang diinginkan, deadline, dll." id="inputDesc"></textarea>
+        </div>
+        <button class="btn-submit" onclick="submitOrder()" id="btnSubmit">Kirim Permintaan Order</button>
+      </div>
+      <div class="form-success" id="formSuccess">
+        <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+        <h3>Permintaan Diterima!</h3>
+        <p>Terima kasih! Kami akan menghubungi kamu via WhatsApp dalam waktu dekat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Dev<span>Forge</span></div>
+  <div class="footer-copy">© 2025 DevForge · Jasa Pembuatan Website & App</div>
+</footer>
+
+<!-- FLOATING WA -->
+<a href="https://wa.me/62882009259927" target="_blank" class="wa-float" title="Chat WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+</a>
+
+<script>
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // FORM SUBMIT
+  function submitOrder() {
+    const nama = document.getElementById('inputNama').value.trim();
+    const wa = document.getElementById('inputWa').value.trim();
+    const layanan = document.getElementById('inputLayanan').value;
+    const desc = document.getElementById('inputDesc').value.trim();
+
+    if (!nama || !wa || !layanan) {
+      alert('Mohon isi nama, nomor WhatsApp, dan pilih layanan terlebih dahulu.');
+      return;
+    }
+
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Mengirim...';
+
+    // Simulate send then open WA
+    setTimeout(() => {
+      const msg = encodeURIComponent(
+        `Halo DevForge! Saya ingin order:\n\n` +
+        `Nama: ${nama}\n` +
+        `WA: ${wa}\n` +
+        `Layanan: ${layanan}\n` +
+        `Deskripsi: ${desc || '-'}`
+      );
+      window.open(`https://wa.me/62882009259927?text=${msg}`, '_blank');
+
+      document.getElementById('orderForm').style.display = 'none';
+      document.getElementById('formSuccess').classList.add('visible');
+    }, 800);
+  }
+
+  // NAV active state
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--text)' : '';
+    });
+  });
+</script>
+</body>
+</html>

@@ -289,16 +289,14 @@ class _QuickActions extends StatelessWidget {
                   label: 'Upload\nFile',
                   color: kAccentGreen,
                   onTap: () {
-                    ref.read(documentsProvider.notifier).simulateUpload(
-                        'NewDocument.pdf', FileExtension.pdf, 142.5);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Uploading file...',
+                        content: Text('Gunakan tombol Upload di pojok kanan bawah',
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: kTextPrimary)),
                         backgroundColor: kSurface2Color,
-                        duration: const Duration(seconds: 3),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   },

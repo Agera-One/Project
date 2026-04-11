@@ -39,9 +39,7 @@ public class InventarisFrame extends JFrame {
 
         add(form, BorderLayout.NORTH);
 
-        model = new DefaultTableModel(
-                new String[]{"Kode","Nama","Stok","Harga"},0
-        );
+        model = new DefaultTableModel( new String[]{"Kode","Nama","Stok","Harga"},0);
 
         table = new JTable(model);
 
@@ -52,16 +50,19 @@ public class InventarisFrame extends JFrame {
         JButton btnTambah = new JButton("Tambah");
         JButton btnUpdate = new JButton("Update");
         JButton btnHapus = new JButton("Hapus");
+        JButton btnClear = new JButton("Clear");
 
         panelBtn.add(btnTambah);
         panelBtn.add(btnUpdate);
         panelBtn.add(btnHapus);
+        panelBtn.add(btnClear);
 
         add(panelBtn, BorderLayout.SOUTH);
-
+        
         btnTambah.addActionListener(e -> tambahData());
         btnUpdate.addActionListener(e -> updateData());
         btnHapus.addActionListener(e -> hapusData());
+        btnClear.addActionListener(e -> clearForm());
 
         table.getSelectionModel().addListSelectionListener(e -> isiForm());
 
@@ -69,121 +70,90 @@ public class InventarisFrame extends JFrame {
     }
 
     void tambahData() {
-
         try {
-
             Connection conn = Koneksi.getConnection();
-
             String sql = "INSERT INTO barang VALUES(?,?,?,?)";
-
             PreparedStatement ps = conn.prepareStatement(sql);
 
             ps.setString(1, tfKode.getText());
             ps.setString(2, tfNama.getText());
             ps.setInt(3, Integer.parseInt(tfStok.getText()));
-            ps.setDouble(4, Double.parseDouble(tfHarga.getText()));
-
+            ps.setInt(4, Integer.parseInt(tfHarga.getText()));
             ps.executeUpdate();
 
             loadTable();
             clearForm();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     void updateData() {
-
         try {
-
             Connection conn = Koneksi.getConnection();
-
             String sql = "UPDATE barang SET nama=?,stok=?,harga=? WHERE kode=?";
-
             PreparedStatement ps = conn.prepareStatement(sql);
 
             ps.setString(1, tfNama.getText());
             ps.setInt(2, Integer.parseInt(tfStok.getText()));
-            ps.setDouble(3, Double.parseDouble(tfHarga.getText()));
+            ps.setInt(3, Integer.parseInt(tfHarga.getText()));
             ps.setString(4, tfKode.getText());
-
             ps.executeUpdate();
 
             loadTable();
             clearForm();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     void hapusData() {
-
         try {
-
             Connection conn = Koneksi.getConnection();
-
             String sql = "DELETE FROM barang WHERE kode=?";
-
             PreparedStatement ps = conn.prepareStatement(sql);
 
             ps.setString(1, tfKode.getText());
-
             ps.executeUpdate();
 
             loadTable();
             clearForm();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     void loadTable() {
-
         model.setRowCount(0);
-
         try {
-
             Connection conn = Koneksi.getConnection();
-
             Statement st = conn.createStatement();
-
             ResultSet rs = st.executeQuery("SELECT * FROM barang");
 
             while(rs.next()){
-
                 model.addRow(new Object[]{
-                        rs.getString("kode"),
-                        rs.getString("nama"),
-                        rs.getInt("stok"),
-                        rs.getDouble("harga")
+                    rs.getString("kode"),
+                    rs.getString("nama"),
+                    rs.getInt("stok"),
+                    String.format("%,d", rs.getInt("Harga"))
                 });
-
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     void isiForm(){
-
         int row = table.getSelectedRow();
-
         if(row != -1){
-
             tfKode.setText(model.getValueAt(row,0).toString());
             tfNama.setText(model.getValueAt(row,1).toString());
             tfStok.setText(model.getValueAt(row,2).toString());
-            tfHarga.setText(model.getValueAt(row,3).toString());
-
+            tfHarga.setText(model.getValueAt(row, 3).toString().replace(",", ""));
         }
     }
 
     void clearForm(){
-
         tfKode.setText("");
         tfNama.setText("");
         tfStok.setText("");

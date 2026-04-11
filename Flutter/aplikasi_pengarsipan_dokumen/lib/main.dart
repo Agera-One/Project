@@ -2,18 +2,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Force portrait orientation
+  await Supabase.initialize(
+    url: 'https://zyadznsegqfkfkxaxabn.supabase.co',
+    anonKey: 'sb_publishable_IMc6WSTyYNfGk6HpU7WP1Q_r32TPDzx',
+  );
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Status bar style for dark theme
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -23,9 +27,5 @@ void main() {
     ),
   );
 
-  runApp(
-    const ProviderScope(
-      child: DocumentArchiverApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: DocumentArchiverApp()));
 }

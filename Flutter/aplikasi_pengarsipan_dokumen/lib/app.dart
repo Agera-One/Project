@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/documents_provider.dart';
+import 'screens/auth_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/documents_screens.dart';
 import 'screens/search_screen.dart';
@@ -19,15 +21,82 @@ class DocumentArchiverApp extends StatelessWidget {
       title: 'Document Archiver',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
-      home: const AppShell(),
+      home: const _AuthGate(),
     );
   }
 }
 
-// ─── Bottom Nav Index mapping ─────────────────────────────────────────────────
-// Bottom nav : 0=Home  1=Recent  2=Search  3=Docs
-// Screen idx : 0=Dashboard  1=Recently  2=Search  3=MyDocs
-//   (drawer-only screens: 4=Starred  5=Archives  6=Trash)
+// ─── Auth Gate ────────────────────────────────────────────────
+// Menggunakan ConsumerStatefulWidget agar bisa listen perubahan
+// auth secara real-time (login, logout, session restore).
+class _AuthGate extends ConsumerStatefulWidget {
+  const _AuthGate();
+
+  @override
+  ConsumerState<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends ConsumerState<_AuthGate> {
+  bool _isLoading = true;
+  bool _isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialSession();
+    _listenAuthChanges();
+  }
+
+  // Cek session yang sudah tersimpan secara synchronous.
+  // Ini yang memastikan user tidak tembus ke dashboard
+  // saat belum login.
+  void _checkInitialSession() {
+    final session = Supabase.instance.client.auth.currentSession;
+    setState(() {
+      _isLoggedIn = session != null && session.user != null;
+      _isLoading = false;
+    });
+  }
+
+  // Listen perubahan auth state (login / logout) secara real-time
+  void _listenAuthChanges() {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (!mounted) return;
+      final session = data.session;
+      final isNowLoggedIn = session != null && session.user != null;
+
+      setState(() => _isLoggedIn = isNowLoggedIn);
+
+      if (isNowLoggedIn) {
+        // Baru login → fetch dokumen
+        ref.read(documentsProvider.notifier).fetchDocuments();
+      } else {
+        // Logout → bersihkan state dokumen
+        ref.read(documentsProvider.notifier).resetState();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Tampilkan loading spinner saat cek session awal
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: kBgColor,
+        body: Center(
+          child: CircularProgressIndicator(color: kAccentGreen),
+        ),
+      );
+    }
+
+    // Routing berdasarkan status login
+    return _isLoggedIn ? const AppShell() : const AuthScreen();
+  }
+}
+
+// ─── Bottom Nav Index mapping ─────────────────────────────────
+// 0=Dashboard  1=Recently  2=Search  3=MyDocs
+// 4=Starred  5=Archives  6=Trash  (drawer only)
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
@@ -37,23 +106,19 @@ class AppShell extends ConsumerWidget {
     final currentIndex = ref.watch(currentScreenProvider);
 
     final screens = [
-      const DashboardScreen(),   // 0
-      const RecentlyScreen(),    // 1
-      const SearchScreen(),      // 2  ← baru
-      const MyDocumentsScreen(), // 3
-      const StarredScreen(),     // 4  (via drawer)
-      const ArchivesScreen(),    // 5  (via drawer)
-      const TrashScreen(),       // 6  (via drawer)
+      const DashboardScreen(),
+      const RecentlyScreen(),
+      const SearchScreen(),
+      const MyDocumentsScreen(),
+      const StarredScreen(),
+      const ArchivesScreen(),
+      const TrashScreen(),
     ];
-
-    // Apakah layar aktif termasuk 4 tab bottom nav?
-    final isBottomNavScreen = currentIndex <= 3;
 
     return Scaffold(
       backgroundColor: kBgColor,
       drawer: const AppDrawer(),
 
-      // AppBar hanya untuk Dashboard (index 0)
       appBar: currentIndex == 0
           ? AppBar(
               backgroundColor: kSurfaceColor,
@@ -102,14 +167,13 @@ class AppShell extends ConsumerWidget {
         children: screens,
       ),
 
-      // FAB tidak tampil di halaman Search
-      floatingActionButton: currentIndex == 2 ? null : const UploadFab(),
+      floatingActionButton:
+          currentIndex == 2 ? null : const UploadFab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
       bottomNavigationBar: _BottomNav(
         currentIndex: currentIndex,
         onTap: (navIdx) {
-          // navIdx 0→screen 0, 1→screen 1, 2→screen 2, 3→screen 3
           ref.read(currentScreenProvider.notifier).state = navIdx;
         },
       ),
@@ -117,7 +181,7 @@ class AppShell extends ConsumerWidget {
   }
 }
 
-// ─── Bottom Navigation Bar ────────────────────────────────────────────────────
+// ─── Bottom Navigation Bar ────────────────────────────────────
 class _BottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -126,8 +190,6 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Hanya 4 tab yang ada di bottom nav (index 0–3)
-    // Jika user di drawer-only screen (4,5,6), tidak ada tab yang aktif
     final activeTab = currentIndex <= 3 ? currentIndex : -1;
 
     return Container(
@@ -173,7 +235,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-// ─── Regular Nav Item ─────────────────────────────────────────────────────────
+// ─── Regular Nav Item ─────────────────────────────────────────
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final IconData activeIcon;
@@ -200,7 +262,8 @@ class _NavItem extends StatelessWidget {
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: isActive
                     ? kAccentGreen.withOpacity(0.12)
@@ -219,7 +282,8 @@ class _NavItem extends StatelessWidget {
               style: GoogleFonts.poppins(
                 color: isActive ? kAccentGreen : kTextTertiary,
                 fontSize: 10,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                fontWeight:
+                    isActive ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],
@@ -229,7 +293,7 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-// ─── Special Search Nav Item ──────────────────────────────────────────────────
+// ─── Special Search Nav Item ──────────────────────────────────
 class _SearchNavItem extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
@@ -247,9 +311,9 @@ class _SearchNavItem extends StatelessWidget {
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
-                // Search pakai accent tersendiri saat aktif (lingkaran hijau)
                 color: isActive
                     ? kAccentGreen.withOpacity(0.15)
                     : Colors.transparent,
@@ -260,7 +324,9 @@ class _SearchNavItem extends StatelessWidget {
                     : null,
               ),
               child: Icon(
-                isActive ? Icons.search_rounded : Icons.search_outlined,
+                isActive
+                    ? Icons.search_rounded
+                    : Icons.search_outlined,
                 color: isActive ? kAccentGreen : kTextTertiary,
                 size: 22,
               ),
@@ -271,7 +337,8 @@ class _SearchNavItem extends StatelessWidget {
               style: GoogleFonts.poppins(
                 color: isActive ? kAccentGreen : kTextTertiary,
                 fontSize: 10,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                fontWeight:
+                    isActive ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],
