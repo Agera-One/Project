@@ -9,8 +9,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
-    url: 'https://zyadznsegqfkfkxaxabn.supabase.co',
-    anonKey: 'sb_publishable_IMc6WSTyYNfGk6HpU7WP1Q_r32TPDzx',
+    url: 'YOUR SUPABASE URL',
+    anonKey: 'YOUR SUPABASE KEY',
   );
 
   SystemChrome.setPreferredOrientations([
