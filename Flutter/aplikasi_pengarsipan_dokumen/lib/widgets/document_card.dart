@@ -231,15 +231,82 @@ class DocumentCard extends ConsumerWidget {
                   icon: Icons.download_rounded,
                   label: 'Download',
                   iconColor: kTextPrimary,
-                  onTap: () {
+                  onTap: () async {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Download belum tersedia',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: kTextPrimary)),
-                      backgroundColor: kSurface2Color,
-                    ));
+
+                    try {
+                      final downloadFuture = ref
+                          .read(documentsProvider.notifier)
+                          .downloadDocument(document);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          duration: const Duration(
+                              days: 1),
+                          backgroundColor: kSurface2Color,
+                          content: Consumer(
+                            builder: (context, ref, child) {
+                              final progress =
+                                  ref.watch(documentsProvider).downloadProgress;
+                              final isDownloading =
+                                  ref.watch(documentsProvider).isDownloading;
+
+                              if (!isDownloading) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                });
+                              }
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Mengunduh ${document.fileName}...",
+                                    style: GoogleFonts.poppins(
+                                        color: kTextPrimary, fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: progress,
+                                      backgroundColor: kDividerColor,
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                              kAccentGreen),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      );
+
+                      await downloadFuture;
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text('Berhasil disimpan di folder Download'),
+                            backgroundColor: kAccentGreenDark,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Gagal mengunduh file'),
+                              backgroundColor: Colors.red),
+                        );
+                      }
+                    }
                   },
                 ),
 

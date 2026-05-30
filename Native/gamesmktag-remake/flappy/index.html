@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Bird | SMKTAG</title>
+  <link rel="icon" type="image/png" href="sprites/bluebird-downflap.png">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --bg-card: #111827;
+      --border: #1f2937;
+      --sky-top: #0ea5e9;
+      --sky-bottom: #06b6d4;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.3);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Animated sky gradient background */
+    .sky-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, #0c4a6e 0%, #075985 40%, #0a0e1a 100%);
+      z-index: 0;
+    }
+
+    .clouds {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+    }
+
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 100px;
+      opacity: 0.6;
+    }
+
+    .cloud::before {
+      content: '';
+      position: absolute;
+      background: white;
+      border-radius: 100px;
+    }
+
+    .cloud:nth-child(1) { width: 120px; height: 40px; top: 15%; left: -120px; animation: float-cloud 25s linear infinite; }
+    .cloud:nth-child(1)::before { width: 50px; height: 50px; top: -25px; left: 15px; }
+    .cloud:nth-child(2) { width: 100px; height: 35px; top: 35%; left: -100px; animation: float-cloud 30s linear infinite 5s; }
+    .cloud:nth-child(2)::before { width: 60px; height: 40px; top: -20px; right: 15px; }
+    .cloud:nth-child(3) { width: 140px; height: 45px; top: 25%; left: -140px; animation: float-cloud 35s linear infinite 10s; }
+    .cloud:nth-child(3)::before { width: 70px; height: 55px; top: -30px; left: 25px; }
+
+    @keyframes float-cloud {
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(100vw + 200px)); }
+    }
+
+    /* Stars */
+    .stars {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 60%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* Header */
+    .game-header {
+      width: 100%;
+      max-width: 500px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+      background: var(--bg-card);
+    }
+
+    .back-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: translateX(-3px);
+    }
+
+    .game-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    /* Game Container */
+    .game-wrapper {
+      position: relative;
+      z-index: 1;
+      padding: 4px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--sky-top), var(--accent));
+      box-shadow: 0 20px 60px rgba(14, 165, 233, 0.2);
+    }
+
+    .game-inner {
+      background: var(--bg);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 20px;
+    }
+
+    /* Score overlay on canvas */
+    .score-overlay {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 30px rgba(245, 158, 11, 0.5);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Start Screen */
+    .start-screen {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      background: rgba(10, 14, 26, 0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    .start-screen.hidden {
+      display: none;
+    }
+
+    .bird-logo {
+      font-size: 80px;
+      margin-bottom: 10px;
+      animation: float-bird 2s ease-in-out infinite;
+    }
+
+    @keyframes float-bird {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .start-screen h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .start-screen p {
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .tap-hint {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.1);
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      color: var(--text);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* Game Over Screen */
+    .gameover-screen {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      background: rgba(10, 14, 26, 0.85);
+      backdrop-filter: blur(8px);
+    }
+
+    .gameover-screen.show {
+      display: flex;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .gameover-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 35px;
+      text-align: center;
+      min-width: 280px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    }
+
+    .gameover-card .medal {
+      font-size: 60px;
+      margin-bottom: 10px;
+    }
+
+    .gameover-card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      color: var(--danger);
+      margin-bottom: 20px;
+    }
+
+    .score-board {
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .score-row:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .score-row .lbl {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .score-row .val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .score-row.best .val {
+      color: var(--accent);
+    }
+
+    .score-row.current .val {
+      color: var(--text);
+    }
+
+    .gameover-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #d97706);
+      color: white;
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    /* Footer */
+    .game-footer {
+      margin-top: 30px;
+      padding: 20px;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .game-footer p {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .game-footer .heart {
+      color: var(--danger);
+      display: inline-block;
+      animation: heartbeat 1.5s ease infinite;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 480px) {
+      .game-header { padding: 15px; }
+      .game-title { font-size: 16px; }
+      canvas { width: 100%; max-width: 360px; height: auto; }
+      .score-overlay { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sky-bg"></div>
+  
+  <!-- Clouds -->
+  <div class="clouds">
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+  </div>
+
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Header -->
+  <div class="game-header">
+    <a href="../index.html" class="back-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5m7 7l-7-7 7-7"/></svg>
+      Menu
+    </a>
+    <div class="game-title">🐦 FLAPPY</div>
+    <div style="width: 80px;"></div>
+  </div>
+
+  <!-- Game -->
+  <div class="game-wrapper">
+    <div class="game-inner">
+      <canvas id="canvas"></canvas>
+      <div class="score-overlay" id="scoreOverlay">0</div>
+      
+      <!-- Start Screen -->
+      <div class="start-screen" id="startScreen">
+        <div class="bird-logo">🐦</div>
+        <h2>FLAPPY BIRD</h2>
+        <p>Tap or press Space to fly</p>
+        <div class="tap-hint">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19V5m-7 7l7-7 7 7"/></svg>
+          Click or Space to Start
+        </div>
+      </div>
+
+      <!-- Game Over Screen -->
+      <div class="gameover-screen" id="gameOverScreen">
+        <div class="gameover-card">
+          <div class="medal" id="medalEmoji">🥉</div>
+          <h2>GAME OVER</h2>
+          <div class="score-board">
+            <div class="score-row current">
+              <span class="lbl">Score</span>
+              <span class="val" id="finalScore">0</span>
+            </div>
+            <div class="score-row best">
+              <span class="lbl">Best</span>
+              <span class="val" id="bestScore">0</span>
+            </div>
+          </div>
+          <div class="gameover-buttons">
+            <button class="btn btn-primary" onclick="restartGame()">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              Try Again
+            </button>
+            <a href="../index.html" class="btn btn-secondary">Menu</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="game-footer">
+    <p>Made with <span class="heart">♥</span> Rekayasa Perangkat Lunak <span class="heart">♥</span><br>SMK 17 AGUSTUS 1945 SURABAYA</p>
+  </div>
+
+  <!-- Generate stars -->
+  <script>
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      star.style.width = Math.random() * 2 + 1 + 'px';
+      star.style.height = star.style.width;
+      starsContainer.appendChild(star);
+    }
+
+    // Hook into game.js events (assuming your game.js uses these patterns)
+    // If your game.js doesn't expose these, you'll need to modify game.js slightly
+    
+    // Listen for score updates
+    let currentScore = 0;
+    let bestScore = parseInt(localStorage.getItem('flappyBestScore')) || 0;
+    document.getElementById('bestScore').textContent = bestScore;
+
+    // Override alert and game over handling
+    const originalAlert = window.alert;
+    window.alert = function(msg) {
+      if (msg && msg.includes('Game Over')) {
+        // Extract score from message if possible, or use currentScore
+        handleGameOver(currentScore);
+      } else {
+        originalAlert(msg);
+      }
+    };
+
+    function handleGameOver(score) {
+      currentScore = score;
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('flappyBestScore', bestScore);
+      }
+      
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('bestScore').textContent = bestScore;
+      
+      // Medal based on score
+      const medal = document.getElementById('medalEmoji');
+      if (score >= 20) medal.textContent = '🥇';
+      else if (score >= 10) medal.textContent = '🥈';
+      else medal.textContent = '🥉';
+      
+      document.getElementById('gameOverScreen').classList.add('show');
+    }
+
+    function restartGame() {
+      document.getElementById('gameOverScreen').classList.remove('show');
+      document.getElementById('startScreen').classList.remove('hidden');
+      // Trigger game restart - adjust based on your game.js
+      if (typeof resetGame === 'function') resetGame();
+      else location.reload();
+    }
+
+    // Hide start screen on first interaction
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Space') {
+        document.getElementById('startScreen').classList.add('hidden');
+      }
+    });
+    document.addEventListener('click', function() {
+      document.getElementById('startScreen').classList.add('hidden');
+    });
+  </script>
+
+  <script src="game.js"></script>
+</body>
+</html>

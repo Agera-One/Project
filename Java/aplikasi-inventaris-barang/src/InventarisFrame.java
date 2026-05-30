@@ -1,29 +1,98 @@
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.*;
 import java.sql.*;
 
 public class InventarisFrame extends JFrame {
-
     JTextField tfKode, tfNama, tfStok, tfHarga;
+    JButton btnTambah, btnUpdate, btnHapus, btnClear;
     JTable table;
     DefaultTableModel model;
 
     public InventarisFrame() {
-
         setTitle("Inventaris Barang");
-        setSize(600,400);
+        setSize(600, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         setLayout(new BorderLayout());
 
-        JPanel form = new JPanel(new GridLayout(4,2));
+        JPanel form = new JPanel(new GridLayout(4, 2));
 
         tfKode = new JTextField();
         tfNama = new JTextField();
         tfStok = new JTextField();
         tfHarga = new JTextField();
+
+        tfKode.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent ke) {
+                char c = ke.getKeyChar();
+                String kode = tfKode.getText();
+
+                if (kode.length() >= 10) {
+                    ke.consume();
+                }
+
+                if (!Character.isLetterOrDigit(c)) {
+                    ke.consume();
+                }
+            }
+        });
+        
+        tfNama.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent ke) {
+                char c = ke.getKeyChar();
+                String nama = tfNama.getText();
+
+                if (nama.length() >= 100) {
+                    ke.consume();
+                }
+
+                if (nama.isEmpty() && c == ' ') {
+                    ke.consume();
+                } else if (!nama.isEmpty() && nama.endsWith(" ") && c == ' ') {
+                    ke.consume();
+                } else if (!Character.isLetterOrDigit(c) && c != ' ') {
+                    ke.consume();
+                }
+            }
+        });
+        
+        tfStok.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent ke) {
+                char c = ke.getKeyChar();
+                String stok = tfStok.getText();
+
+                if (stok.length() >= 4) {
+                    ke.consume();
+                }
+
+                if (!Character.isDigit(c)) {
+                    ke.consume();
+                } else if (stok.isEmpty() && c == '0') {
+                    ke.consume();
+                }
+            }
+        });
+        
+        tfHarga.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent ke) {
+                char c = ke.getKeyChar();
+                String harga = tfHarga.getText();
+
+                if (harga.length() >= 9) {
+                    ke.consume();
+                }
+
+                if (!Character.isDigit(c)) {
+                    ke.consume();
+                } else if (harga.isEmpty() && c == '0') {
+                    ke.consume();
+                }
+            }
+        });
 
         form.add(new JLabel("Kode"));
         form.add(tfKode);
@@ -39,7 +108,17 @@ public class InventarisFrame extends JFrame {
 
         add(form, BorderLayout.NORTH);
 
-        model = new DefaultTableModel( new String[]{"Kode","Nama","Stok","Harga"},0);
+        model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        model.addColumn("Kode");
+        model.addColumn("Nama");
+        model.addColumn("Stok");
+        model.addColumn("Harga");
 
         table = new JTable(model);
 
@@ -47,10 +126,10 @@ public class InventarisFrame extends JFrame {
 
         JPanel panelBtn = new JPanel();
 
-        JButton btnTambah = new JButton("Tambah");
-        JButton btnUpdate = new JButton("Update");
-        JButton btnHapus = new JButton("Hapus");
-        JButton btnClear = new JButton("Clear");
+        btnTambah = new JButton("Tambah");
+        btnUpdate = new JButton("Update");
+        btnHapus = new JButton("Hapus");
+        btnClear = new JButton("Clear");
 
         panelBtn.add(btnTambah);
         panelBtn.add(btnUpdate);
@@ -58,15 +137,84 @@ public class InventarisFrame extends JFrame {
         panelBtn.add(btnClear);
 
         add(panelBtn, BorderLayout.SOUTH);
-        
-        btnTambah.addActionListener(e -> tambahData());
-        btnUpdate.addActionListener(e -> updateData());
-        btnHapus.addActionListener(e -> hapusData());
-        btnClear.addActionListener(e -> clearForm());
 
-        table.getSelectionModel().addListSelectionListener(e -> isiForm());
+        btnTambah.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (ValidasiInput()) {
+                    tambahData();
+                }
+            }
+        });
+
+        btnUpdate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (ValidasiInput()) {
+                    updateData();
+                }
+            }
+        });
+
+        btnHapus.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                String kode = tfKode.getText();
+
+                if (kode.isEmpty()) {
+                    JOptionPane.showMessageDialog(null,
+                            "Jika ingin menghapus data, tolong double click",
+                            "Peringatan",
+                            JOptionPane.WARNING_MESSAGE);
+                } else {
+                    int confirm = JOptionPane.showConfirmDialog(null,
+                            "Hapus data ini?",
+                            "Konfirmasi",
+                            JOptionPane.YES_NO_OPTION);
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        hapusData();
+                    }
+                }
+            }
+        });
+
+        btnClear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearForm();
+            }
+        });
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int baris = table.getSelectedRow();
+
+                    if (baris != -1) {
+                        isiForm();
+                    }
+                }
+            }
+        });
 
         loadTable();
+    }
+
+    boolean ValidasiInput() {
+        String kode = tfKode.getText();
+        String nama = tfNama.getText();
+        String stok = tfStok.getText();
+        String harga = tfHarga.getText();
+
+        if (kode.isEmpty() || nama.trim().isEmpty()
+                || stok.isEmpty() || harga.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Form tidak boleh kosong");
+            return false;
+        }
+        return true;
     }
 
     void tambahData() {
@@ -76,7 +224,7 @@ public class InventarisFrame extends JFrame {
             PreparedStatement ps = conn.prepareStatement(sql);
 
             ps.setString(1, tfKode.getText());
-            ps.setString(2, tfNama.getText());
+            ps.setString(2, tfNama.getText().trim());
             ps.setInt(3, Integer.parseInt(tfStok.getText()));
             ps.setInt(4, Integer.parseInt(tfHarga.getText()));
             ps.executeUpdate();
@@ -84,7 +232,7 @@ public class InventarisFrame extends JFrame {
             loadTable();
             clearForm();
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Data yang ditambahkan tidak valid ");
         }
     }
 
@@ -94,7 +242,7 @@ public class InventarisFrame extends JFrame {
             String sql = "UPDATE barang SET nama=?,stok=?,harga=? WHERE kode=?";
             PreparedStatement ps = conn.prepareStatement(sql);
 
-            ps.setString(1, tfNama.getText());
+            ps.setString(1, tfNama.getText().trim());
             ps.setInt(2, Integer.parseInt(tfStok.getText()));
             ps.setInt(3, Integer.parseInt(tfHarga.getText()));
             ps.setString(4, tfKode.getText());
@@ -103,7 +251,7 @@ public class InventarisFrame extends JFrame {
             loadTable();
             clearForm();
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Data yang diubah tidak valid ");
         }
     }
 
@@ -119,7 +267,7 @@ public class InventarisFrame extends JFrame {
             loadTable();
             clearForm();
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Data yang dihapus tidak valid");
         }
     }
 
@@ -130,34 +278,33 @@ public class InventarisFrame extends JFrame {
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM barang");
 
-            while(rs.next()){
+            while (rs.next()) {
                 model.addRow(new Object[]{
                     rs.getString("kode"),
                     rs.getString("nama"),
                     rs.getInt("stok"),
-                    String.format("%,d", rs.getInt("Harga"))
+                    rs.getInt("Harga")
                 });
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Data yang ditampilkan tidak ada");
         }
     }
 
-    void isiForm(){
+    void isiForm() {
         int row = table.getSelectedRow();
-        if(row != -1){
-            tfKode.setText(model.getValueAt(row,0).toString());
-            tfNama.setText(model.getValueAt(row,1).toString());
-            tfStok.setText(model.getValueAt(row,2).toString());
-            tfHarga.setText(model.getValueAt(row, 3).toString().replace(",", ""));
+        if (row != -1) {
+            tfKode.setText(model.getValueAt(row, 0).toString());
+            tfNama.setText(model.getValueAt(row, 1).toString());
+            tfStok.setText(model.getValueAt(row, 2).toString());
+            tfHarga.setText(model.getValueAt(row, 3).toString());
         }
     }
 
-    void clearForm(){
+    void clearForm() {
         tfKode.setText("");
         tfNama.setText("");
         tfStok.setText("");
         tfHarga.setText("");
     }
-
 }

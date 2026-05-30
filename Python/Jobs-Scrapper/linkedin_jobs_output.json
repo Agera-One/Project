@@ -1,0 +1,55 @@
+{
+  "scraped_at": "2026-04-13T08:28:24.675143",
+  "source_url": "https://www.linkedin.com/jobs/search/?currentJobId=4394706825&geoId=102478259&keywords=Back%20End%20Developer&origin=JOB_SEARCH_PAGE_KEYWORD_AUTOCOMPLETE&refresh=true",
+  "total_jobs": 1,
+  "jobs": [
+    {
+      "card_index": 1,
+      "job_id": "urn:li:jobPosting:3770227353",
+      "card_title": "Back-end developer",
+      "card_company": "PT DAYA CIPTA MANDIRI SOLUSI",
+      "card_location": "Bandung, Banten, Indonesia",
+      "posted_date": "2 years ago",
+      "card_url": "https://id.linkedin.com/jobs/view/back-end-developer-at-pt-daya-cipta-mandiri-solusi-3770227353?position=1&pageNum=0&refId=Pugb3Z6wdaSKzpWy65ySNA%3D%3D&trackingId=k5VoDCGXVYHJAWSRVQsiVw%3D%3D",
+      "job_title": "Back-end developer",
+      "company_name": "PT DAYA CIPTA MANDIRI SOLUSI",
+      "location": "Bandung, Banten, Indonesia",
+      "work_type_and_level": [
+        "Entry level",
+        "Full-time",
+        "Engineering and Information Technology",
+        "IT Services and IT Consulting"
+      ],
+      "applicant_info": "",
+      "linkedin_skills": [],
+      "description": "Requirements\n\nDaily to-do list will include:\n\nbuilding high-quality reusable code,\n\ndeveloping functional and sustainable applications,\n\nconstantly striving to optimise performance and debugging,\n\nbeing involved and participating in the overall application lifecycle,\n\ndefining and communicating technical and design requirements,\n\nconstantly learning and trying new technologies.\n\nOur Technology Stack\n\nJava and Kotlin,\n\nSpring Boot,\n\nMaven,\n\nGit, GitLab,\n\nContinuous integration tools (Jenkins, TeamCity …),\n\nProfilers (YourKit …),\n\nOpenEHR.\n\nSkills You Need To Excel At This Job\n\nexperience in Java,\n\npassion for learning, growth, and complex challenges,\n\nteamwork and collaboration skills,\n\nEnglish language.\n\nResponsibilities\n\nWhile we currently don’t have specific job positions available, we are nevertheless actively expanding our back-end talent pool for future opportunities.\n\nOur back-end developers are working with our team of developers, designers, DevOps, analysts, and QA testers. The job involves a lot of coding, debugging, problem-solving, code reviewing, trying new technologies, and staying up to date with current best practices.\nShow less",
+      "tech_stack": {
+        "languages": [
+          "Java",
+          "Kotlin"
+        ],
+        "frameworks": [
+          "Spring Boot",
+          "Spring"
+        ],
+        "cloud_devops": [
+          "Jenkins"
+        ],
+        "tools": [
+          "Git",
+          "GitLab"
+        ],
+        "all_tech_stack": [
+          "Java",
+          "Kotlin",
+          "Spring Boot",
+          "Spring",
+          "Jenkins",
+          "Git",
+          "GitLab"
+        ]
+      },
+      "apply_url": "https://id.linkedin.com/jobs/view/back-end-developer-at-pt-daya-cipta-mandiri-solusi-3770227353?position=1&pageNum=0&refId=Pugb3Z6wdaSKzpWy65ySNA%3D%3D&trackingId=k5VoDCGXVYHJAWSRVQsiVw%3D%3D"
+    }
+  ]
+}

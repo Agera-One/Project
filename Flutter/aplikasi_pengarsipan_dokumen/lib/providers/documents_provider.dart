@@ -1,8 +1,12 @@
 // lib/providers/documents_provider.dart
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart'; 
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
 import '../models/document_model.dart';
 
 enum SortOption { nameAsc, nameDesc, dateNewest, dateOldest, sizeDesc, sizeAsc }
@@ -56,6 +60,8 @@ class DocumentsState {
   final bool isLoading;
   final bool isUploading;
   final double uploadProgress;
+  final bool isDownloading;
+  final double downloadProgress;
 
   const DocumentsState({
     required this.documents,
@@ -64,6 +70,8 @@ class DocumentsState {
     this.isLoading = false,
     this.isUploading = false,
     this.uploadProgress = 0.0,
+    this.isDownloading = false,
+    this.downloadProgress = 0,
   });
 
   DocumentsState copyWith({
@@ -73,6 +81,8 @@ class DocumentsState {
     bool? isLoading,
     bool? isUploading,
     double? uploadProgress,
+    bool? isDownloading,
+    double? downloadProgress,
   }) =>
       DocumentsState(
         documents: documents ?? this.documents,
@@ -81,6 +91,8 @@ class DocumentsState {
         isLoading: isLoading ?? this.isLoading,
         isUploading: isUploading ?? this.isUploading,
         uploadProgress: uploadProgress ?? this.uploadProgress,
+        isDownloading: isDownloading ?? this.isDownloading,
+        downloadProgress: downloadProgress ?? this.downloadProgress,
       );
 
   // ── Filter & Sort helpers ─────────────────────────────────
@@ -92,17 +104,23 @@ class DocumentsState {
 
     switch (sortOption) {
       case SortOption.nameAsc:
-        result.sort((a, b) => a.fileName.compareTo(b.fileName));
+        result.sort((a, b) => a.fileName.toLowerCase().compareTo(b.fileName.toLowerCase()));
+        break;
       case SortOption.nameDesc:
-        result.sort((a, b) => b.fileName.compareTo(a.fileName));
+        result.sort((a, b) => b.fileName.toLowerCase().compareTo(a.fileName.toLowerCase()));
+        break;
       case SortOption.dateNewest:
         result.sort((a, b) => b.dateModified.compareTo(a.dateModified));
+        break;
       case SortOption.dateOldest:
         result.sort((a, b) => a.dateModified.compareTo(b.dateModified));
+        break;
       case SortOption.sizeDesc:
         result.sort((a, b) => b.sizeKb.compareTo(a.sizeKb));
+        break;
       case SortOption.sizeAsc:
         result.sort((a, b) => a.sizeKb.compareTo(b.sizeKb));
+        break;
     }
     return result;
   }
@@ -200,6 +218,48 @@ class DocumentsNotifier extends StateNotifier<DocumentsState> {
     _channel?.unsubscribe();
     _channel = null;
     state = const DocumentsState(documents: []);
+  }
+
+  // ── Download ─────────────────────────────────────────────
+  Future<void> downloadDocument(DocumentModel doc) async {
+    try {
+      state = state.copyWith(isDownloading: true, downloadProgress: 0);
+
+      final String signedUrl = await _db.storage
+          .from('documents')
+          .createSignedUrl(doc.filePath, 60);
+
+      final dir = await getExternalStorageDirectory();
+      
+      String extensionString = doc.extension.toString().split('.').last;
+      
+      String fullFileName = doc.fileName;
+      if (!fullFileName.toLowerCase().endsWith('.$extensionString')) {
+        fullFileName = "$fullFileName.$extensionString";
+      }
+
+      final String savePath = "${dir!.path}/$fullFileName";
+
+      await Dio().download(
+        signedUrl,
+        savePath,
+        onReceiveProgress: (count, total) {
+          if (total != -1) {
+            state = state.copyWith(downloadProgress: count / total);
+          }
+        },
+      );
+
+      await OpenFilex.open(savePath);
+
+      state = state.copyWith(isDownloading: false, downloadProgress: 0);
+      
+      print("File disimpan ke: $savePath");
+      
+    } catch (e) {
+      state = state.copyWith(isDownloading: false, downloadProgress: 0);
+      rethrow;
+    }
   }
 
   // ── Toggle Star ───────────────────────────────────────────

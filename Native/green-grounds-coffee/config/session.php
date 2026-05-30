@@ -1,9 +1,29 @@
 <?php
 // Session Configuration and Initialization
 
+if (!defined('SESSION_TIMEOUT')) {
+    define('SESSION_TIMEOUT', 1800); // 1800 detik = 30 menit
+}
+
+if (!defined('BASE_URL')) {
+    define('BASE_URL', 'http://localhost/green-grounds-coffee'); // Sesuaikan dengan URL lokalmu
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
-        'lifetime' => 0, // penting
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => isset($_SERVER['HTTPS']),
+        'httponly' => true,
+        'samesite' => 'Lax' 
+    ]);
+
+    session_start();
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 86400, // penting
         'path' => '/',
         'secure' => isset($_SERVER['HTTPS']),
         'httponly' => true,

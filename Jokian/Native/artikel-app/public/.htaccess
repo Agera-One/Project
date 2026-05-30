@@ -1,0 +1,17 @@
+Options -Indexes
+RewriteEngine On
+
+# Keamanan: blokir akses ke file sensitif
+RewriteRule ^(config|app|views)/ - [F,L]
+RewriteRule \.php$ - [F,L]
+
+# Arahkan semua request ke index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Header keamanan
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"

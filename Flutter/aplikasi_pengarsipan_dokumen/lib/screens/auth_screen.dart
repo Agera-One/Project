@@ -65,23 +65,44 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
   // ── Submit form ───────────────────────────────────────────
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    FocusScope.of(context).unfocus();
+    if (!_formKey.currentState!.validate()) return;
 
-    final notifier = ref.read(authNotifierProvider.notifier);
-    final isSignUp = ref.read(authNotifierProvider).isSignUp;
+    final authState = ref.read(authNotifierProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
 
-    if (isSignUp) {
-      await notifier.signUp(
-        fullName: _nameCtrl.text,
-        email: _emailCtrl.text,
-        password: _passCtrl.text,
-      );
-    } else {
-      await notifier.signIn(
-        email: _emailCtrl.text,
-        password: _passCtrl.text,
-      );
+    final success = await authNotifier.submit(
+      email: _emailCtrl.text.trim(),
+      password: _passCtrl.text.trim(),
+      fullName: authState.isSignUp ? _nameCtrl.text.trim() : null,
+    );
+
+    if (success) {
+      if (authState.isSignUp && mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            backgroundColor: kSurface2Color,
+            title: Text('Verifikasi Email',
+                style: GoogleFonts.poppins(
+                    color: kAccentGreen, fontWeight: FontWeight.bold)),
+            content: Text(
+              'Link verifikasi telah dikirim ke ${_emailCtrl.text}. Silakan cek kotak masuk atau spam Gmail kamu.',
+              style: GoogleFonts.poppins(color: kTextSecondary),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  authNotifier.toggleMode();
+                },
+                child: const Text('Ke Halaman Login',
+                    style: TextStyle(color: kAccentGreen)),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
@@ -105,16 +126,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                 Expanded(
                   child: Text(
                     next.errorMessage!,
-                    style: GoogleFonts.poppins(
-                        fontSize: 13, color: Colors.white),
+                    style:
+                        GoogleFonts.poppins(fontSize: 13, color: Colors.white),
                   ),
                 ),
               ],
             ),
             backgroundColor: kPdfColor,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             margin: const EdgeInsets.all(16),
             duration: const Duration(seconds: 4),
           ),
@@ -295,8 +316,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                   color: kTextTertiary,
                   size: 20,
                 ),
-                onPressed: () =>
-                    setState(() => _obscurePass = !_obscurePass),
+                onPressed: () => setState(() => _obscurePass = !_obscurePass),
               ),
               validator: (v) {
                 if (v == null || v.isEmpty) {
@@ -431,8 +451,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: kAccentGreen, width: 1.5),
+          borderSide: const BorderSide(color: kAccentGreen, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

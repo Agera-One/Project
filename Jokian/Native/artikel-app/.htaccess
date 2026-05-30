@@ -1,0 +1,9 @@
+# Root-level .htaccess
+# Arahkan semua traffic ke public/
+
+Options -Indexes
+
+# Jika akses langsung ke root, redirect ke public/
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [L]

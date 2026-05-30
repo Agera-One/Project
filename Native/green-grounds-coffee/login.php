@@ -6,11 +6,11 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/utils.php';
 require_once __DIR__ . '/config/session.php';
 
-// if (is_logged_in()) {
-//     redirect($_SESSION['user_role'] === 'admin'
-//         ? 'admin/dashboard.php'
-//         : 'cashier/index.php');
-// }
+if (is_logged_in()) {
+    redirect($_SESSION['user_role'] === 'admin'
+        ? 'admin/dashboard.php'
+        : 'cashier/index.php');
+}
 
 $errors = [];
 $success = '';

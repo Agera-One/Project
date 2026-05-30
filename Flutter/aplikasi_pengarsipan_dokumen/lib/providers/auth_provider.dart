@@ -58,59 +58,41 @@ class AuthNotifier extends StateNotifier<AuthNotifierState> {
     state = state.copyWith(clearError: true);
   }
 
-  // ── Sign In ───────────────────────────────────────────────
-  Future<void> signIn({
+  // ── Sign In & Sign Up ────────────────────────────────────────
+  Future<bool> submit({
     required String email,
     required String password,
+    String? fullName,
   }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    try {
-      await _auth.auth.signInWithPassword(
-        email: email.trim(),
-        password: password,
-      );
-      state = state.copyWith(isLoading: false);
-    } on AuthException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: _friendlyError(e.message),
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Terjadi kesalahan. Coba lagi.',
-      );
-    }
-  }
+    if (state.isLoading) return false;
 
-  // ── Sign Up ───────────────────────────────────────────────
-  Future<void> signUp({
-    required String fullName,
-    required String email,
-    required String password,
-  }) async {
     state = state.copyWith(isLoading: true, clearError: true);
+
     try {
-      final initials = _buildInitials(fullName);
-      await _auth.auth.signUp(
-        email: email.trim(),
-        password: password,
-        data: {
-          'full_name': fullName.trim(),
-          'initials': initials,
-        },
-      );
+      if (state.isSignUp) {
+        await _auth.auth.signUp(
+          email: email,
+          password: password,
+          data: {
+            'full_name': fullName,
+            'initials': _buildInitials(fullName ?? email),
+          },
+        );
+      } else {
+        await _auth.auth.signInWithPassword(
+          email: email,
+          password: password,
+        );
+      }
+
       state = state.copyWith(isLoading: false);
-    } on AuthException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: _friendlyError(e.message),
-      );
+      return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Terjadi kesalahan. Coba lagi.',
+        errorMessage: _friendlyError(e.toString()),
       );
+      return false;
     }
   }
 

@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SMKTAG — Game JavaScript</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-cyan: #00f5ff;
+      --neon-pink: #ff006e;
+      --neon-yellow: #ffd600;
+      --neon-green: #39ff14;
+      --dark-bg: #050810;
+      --dark-card: #0d1117;
+      --dark-border: #1a2233;
+      --text-primary: #e8f4fd;
+      --text-muted: #7a8fa6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 20px; height: 20px;
+      border: 2px solid var(--neon-cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s, border-color 0.2s;
+      mix-blend-mode: difference;
+    }
+    .cursor-dot {
+      position: fixed;
+      width: 6px; height: 6px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── LOADING SCREEN ─── */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--dark-bg);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #loader.hidden { opacity: 0; visibility: hidden; }
+
+    .loader-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 8px;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 40px var(--neon-cyan);
+      animation: loaderPulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes loaderPulse {
+      from { text-shadow: 0 0 20px var(--neon-cyan); }
+      to   { text-shadow: 0 0 60px var(--neon-cyan), 0 0 100px rgba(0,245,255,0.4); }
+    }
+
+    .loader-bar-wrap {
+      width: 240px;
+      height: 3px;
+      background: var(--dark-border);
+      position: relative;
+      overflow: hidden;
+    }
+    .loader-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      width: 0%;
+      transition: width 0.05s linear;
+      box-shadow: 0 0 12px var(--neon-cyan);
+    }
+    .loader-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 4px;
+      color: var(--text-muted);
+    }
+    .loader-pct {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--neon-cyan);
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,245,255,0.015) 2px,
+        rgba(0,245,255,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    /* ─── AURORA ─── */
+    .aurora {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      mix-blend-mode: screen;
+      animation: auroraFloat linear infinite alternate;
+    }
+    .aurora-blob:nth-child(1) {
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(0,245,255,0.12), transparent 70%);
+      top: 10%; left: -10%;
+      animation-duration: 12s;
+    }
+    .aurora-blob:nth-child(2) {
+      width: 500px; height: 500px;
+      background: radial-gradient(ellipse, rgba(255,0,110,0.09), transparent 70%);
+      top: 30%; right: -5%;
+      animation-duration: 15s;
+      animation-delay: -5s;
+    }
+    .aurora-blob:nth-child(3) {
+      width: 700px; height: 300px;
+      background: radial-gradient(ellipse, rgba(57,255,20,0.06), transparent 70%);
+      bottom: 5%; left: 20%;
+      animation-duration: 18s;
+      animation-delay: -8s;
+    }
+    @keyframes auroraFloat {
+      0%   { transform: translate(0, 0) scale(1); }
+      33%  { transform: translate(40px, -30px) scale(1.1); }
+      66%  { transform: translate(-20px, 20px) scale(0.95); }
+      100% { transform: translate(30px, 10px) scale(1.05); }
+    }
+
+    /* ─── SOUND BARS (decorative) ─── */
+    .sound-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 40px;
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+    .sound-bar {
+      width: 4px;
+      background: var(--neon-cyan);
+      border-radius: 2px 2px 0 0;
+      box-shadow: 0 0 6px var(--neon-cyan);
+      animation: soundPulse ease-in-out infinite alternate;
+    }
+    @keyframes soundPulse {
+      from { transform: scaleY(0.15); opacity: 0.4; }
+      to   { transform: scaleY(1);    opacity: 1;   }
+    }
+
+    /* ─── 3D TILT (applied via JS) ─── */
+    .game-card { transform-style: preserve-3d; will-change: transform; }
+
+    /* ─── PARTICLE CANVAS ─── */
+    #particleCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 500;
+    }
+
+    /* ─── NAV glitch flash ─── */
+    @keyframes navGlitch {
+      0%, 100% { clip-path: none; transform: none; }
+      20% { clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); transform: translateX(-4px); }
+      40% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); transform: translateX(4px); }
+      60% { clip-path: none; transform: translateX(-2px); }
+      80% { clip-path: polygon(0 0, 100% 0, 100% 15%, 0 15%); transform: translateX(2px); }
+    }
+    .nav-logo.glitching { animation: navGlitch 0.3s steps(1) both, neonPulse 3s ease-in-out infinite; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 4rem;
+      background: rgba(5,8,16,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.6rem;
+      letter-spacing: 4px;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px rgba(0,245,255,0.4);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      color: var(--text-muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s, text-shadow 0.3s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 1px;
+      background: var(--neon-cyan);
+      transition: width 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 6rem 4rem 4rem;
+      overflow: hidden;
+    }
+
+    /* Grid background */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,245,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,255,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridShift 20s linear infinite;
+    }
+
+    @keyframes gridShift {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(60px); }
+    }
+
+    /* Radial glow */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(0,245,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 900px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 5px;
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0,245,255,0.4);
+      padding: 0.4rem 1.2rem;
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      animation: fadeInDown 0.8s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    .hero-title .line1 { color: var(--text-primary); display: block; }
+    .hero-title .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 30px rgba(0,245,255,0.5));
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.8s ease 0.35s both;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      gap: 1.2rem;
+      animation: fadeInUp 0.8s ease 0.5s both;
+    }
+
+    .btn-primary {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      padding: 1rem 2.5rem;
+      background: var(--neon-cyan);
+      color: var(--dark-bg);
+      border: none;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      text-decoration: none;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      cursor: none;
+    }
+
+    .btn-primary:hover {
+      background: var(--neon-pink);
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(255,0,110,0.6);
+    }
+
+    .btn-secondary {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      padding: 1rem 2.5rem;
+      background: transparent;
+      color: var(--neon-cyan);
+      border: 1px solid var(--neon-cyan);
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      text-decoration: none;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+      cursor: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0,245,255,0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0,245,255,0.3);
+    }
+
+    /* Floating pixels */
+    .pixel-float {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: var(--neon-cyan);
+      animation: floatPixel linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes floatPixel {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-20px) rotate(360deg); opacity: 0; }
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      background: var(--dark-card);
+      border-top: 1px solid var(--dark-border);
+      border-bottom: 1px solid var(--dark-border);
+      padding: 1.5rem 4rem;
+      display: flex;
+      justify-content: center;
+      gap: 5rem;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--neon-cyan);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 40px;
+      background: var(--dark-border);
+    }
+
+    /* ─── GAMES SECTION ─── */
+    .games-section {
+      padding: 6rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      margin-bottom: 4rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .section-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 5px;
+      color: var(--neon-pink);
+      margin-bottom: 0.8rem;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .section-title span { color: var(--neon-cyan); }
+
+    .section-line {
+      width: 80px; height: 3px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      margin-top: 1rem;
+    }
+
+    /* Game cards grid */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .game-card {
+      position: relative;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      overflow: hidden;
+      transition: transform 0.3s, border-color 0.3s;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,245,255,0.05) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .game-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 40px rgba(0,245,255,0.15), inset 0 0 40px rgba(0,245,255,0.03);
+    }
+
+    .game-card:hover::before { opacity: 1; }
+
+    .card-thumb {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.8) brightness(0.85);
+      transition: filter 0.4s;
+    }
+
+    .game-card:hover .card-thumb {
+      filter: saturate(1.1) brightness(1);
+    }
+
+    .card-thumb-placeholder {
+      width: 100%;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+    }
+
+    .card-thumb-snake {
+      background: linear-gradient(135deg, #0d1117, #1a2810);
+    }
+    .card-thumb-flappy {
+      background: linear-gradient(135deg, #0d1117, #102028);
+    }
+    .card-thumb-tower {
+      background: linear-gradient(135deg, #0d1117, #201810);
+    }
+
+    /* Animated game preview inside cards */
+    .snake-preview {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .snake-canvas-demo {
+      width: 100%;
+      height: 100%;
+    }
+
+    .card-tag {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.55rem;
+      letter-spacing: 3px;
+      padding: 0.3rem 0.8rem;
+      background: rgba(0,245,255,0.15);
+      border: 1px solid rgba(0,245,255,0.4);
+      color: var(--neon-cyan);
+    }
+
+    .card-body {
+      padding: 1.5rem 2rem 2rem;
+    }
+
+    .card-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 3px;
+      color: var(--neon-pink);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.8rem;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-meta {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+    }
+
+    .card-play {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--neon-cyan);
+      text-decoration: none;
+      border: 1px solid rgba(0,245,255,0.4);
+      padding: 0.5rem 1.2rem;
+      transition: all 0.3s;
+      clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+      cursor: none;
+    }
+
+    .card-play:hover {
+      background: var(--neon-cyan);
+      color: var(--dark-bg);
+      box-shadow: 0 0 20px rgba(0,245,255,0.5);
+    }
+
+    /* Progress bar on cards */
+    .card-progress {
+      height: 2px;
+      background: var(--dark-border);
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      animation: progressPulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes progressPulse {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    /* ─── FEATURED BANNER ─── */
+    .feature-banner {
+      margin: 0 4rem 6rem;
+      padding: 4rem;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+    }
+
+    .feature-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -20%;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,0,110,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .feature-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 4px;
+      color: var(--neon-pink);
+      border: 1px solid rgba(255,0,110,0.4);
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .feature-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .feature-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .feature-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .feature-stat-box {
+      background: rgba(0,245,255,0.05);
+      border: 1px solid rgba(0,245,255,0.15);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .feature-stat-box .num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      display: block;
+    }
+
+    .feature-stat-box .lbl {
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--dark-border);
+      padding: 2.5rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1rem;
+      color: var(--neon-cyan);
+      letter-spacing: 4px;
+    }
+
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .footer-tech {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .tech-badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.55rem;
+      letter-spacing: 2px;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--dark-border);
+      color: var(--text-muted);
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Glitch text effect */
+    .glitch {
+      position: relative;
+    }
+
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .glitch::before {
+      animation: glitch1 4s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+    }
+
+    .glitch::after {
+      animation: glitch2 4s infinite;
+      clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%);
+    }
+
+    @keyframes glitch1 {
+      0%, 90%, 100% { transform: translateX(0); }
+      92% { transform: translateX(-4px); }
+      94% { transform: translateX(4px); }
+      96% { transform: translateX(-2px); }
+    }
+
+    @keyframes glitch2 {
+      0%, 90%, 100% { transform: translateX(0); }
+      91% { transform: translateX(4px); }
+      93% { transform: translateX(-4px); }
+      95% { transform: translateX(2px); }
+    }
+
+    /* Neon pulse */
+    @keyframes neonPulse {
+      0%, 100% { text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px rgba(0,245,255,0.4); }
+      50% { text-shadow: 0 0 40px var(--neon-cyan), 0 0 80px rgba(0,245,255,0.6), 0 0 120px rgba(0,245,255,0.2); }
+    }
+
+    .nav-logo { animation: neonPulse 3s ease-in-out infinite; }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── MARQUEE ─── */
+    .marquee-bar {
+      background: var(--neon-cyan);
+      padding: 0.7rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .marquee-track {
+      display: inline-flex;
+      animation: marqueeScroll 20s linear infinite;
+    }
+
+    .marquee-item {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 4px;
+      color: var(--dark-bg);
+      font-weight: 700;
+      padding: 0 3rem;
+    }
+
+    .marquee-sep { color: rgba(5,8,16,0.4); }
+
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .hero { padding: 6rem 1.5rem 3rem; }
+      .stats-bar { padding: 1.5rem; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+      .games-section { padding: 4rem 1.5rem; }
+      .feature-banner { margin: 0 1.5rem 4rem; padding: 2.5rem 1.5rem; grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 1rem; padding: 2rem 1.5rem; text-align: center; }
+      .section-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading screen -->
+  <div id="loader">
+    <div class="loader-logo">SMKTAG</div>
+    <div class="loader-text">INITIALIZING GAME ENGINE</div>
+    <div class="loader-bar-wrap"><div class="loader-bar-fill" id="loaderFill"></div></div>
+    <div class="loader-pct" id="loaderPct">0%</div>
+  </div>
+
+  <!-- Particle canvas -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <!-- Nav -->
+  <nav>
+    <a href="#" class="nav-logo" id="navLogo">SMKTAG</a>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#games">Games</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Floating pixels -->
+  <div id="pixels"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <!-- Aurora -->
+    <div class="aurora">
+      <div class="aurora-blob"></div>
+      <div class="aurora-blob"></div>
+      <div class="aurora-blob"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">▶ REKAYASA PERANGKAT LUNAK — SMK 17 AGUSTUS 1945</div>
+      <h1 class="hero-title">
+        <span class="line1">PLAY</span>
+        <span class="line2 glitch" data-text="JAVASCRIPT">JAVASCRIPT</span>
+      </h1>
+      <p class="hero-sub"><span id="typewriter"></span></p>
+      <div class="hero-cta">
+        <a href="#games" class="btn-primary">▶ MULAI BERMAIN</a>
+        <a href="#about" class="btn-secondary">LIHAT SEMUA</a>
+      </div>
+    </div>
+    <!-- Sound bars -->
+    <div class="sound-bars" id="soundBars"></div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee-bar">
+    <div class="marquee-track">
+      <span class="marquee-item">GAME SNAKE <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">FLAPPY BIRD <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">TOWER SMKTAG <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">JAVASCRIPT GAMES <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">PLAY NOW <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">SMKTAG 2024 <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">GAME SNAKE <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">FLAPPY BIRD <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">TOWER SMKTAG <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">JAVASCRIPT GAMES <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">PLAY NOW <span class="marquee-sep">◆</span></span>
+      <span class="marquee-item">SMKTAG 2024 <span class="marquee-sep">◆</span></span>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div>
+        <div class="stat-num">3</div>
+        <div class="stat-label">Games</div>
+      </div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div>
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Browser</div>
+      </div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div>
+        <div class="stat-num">JS</div>
+        <div class="stat-label">Powered</div>
+      </div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div>
+        <div class="stat-num">FREE</div>
+        <div class="stat-label">To Play</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Games Section -->
+  <section id="games" class="games-section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">// SELECT YOUR GAME</div>
+        <h2 class="section-title">PILIH <span>GAME</span><br>FAVORITMU</h2>
+        <div class="section-line"></div>
+      </div>
+    </div>
+
+    <div class="games-grid">
+
+      <!-- Snake -->
+      <div class="game-card reveal">
+        <div class="card-tag">CLASSIC</div>
+        <canvas id="snakeDemo" width="400" height="220" style="width:100%;height:220px;display:block;background:linear-gradient(135deg,#0d1117,#0a1a0d)"></canvas>
+        <div class="card-body">
+          <div class="card-number">01 / 03</div>
+          <div class="card-progress"><div class="card-progress-fill" style="width:85%"></div></div>
+          <h3 class="card-title">GAME SNAKE</h3>
+          <p class="card-desc">Kendalikan ular, makan makanan, dan hindari dinding. Seberapa panjang kamu bisa bertahan?</p>
+          <div class="card-footer">
+            <div class="card-meta">KEYBOARD · ARCADE</div>
+            <a class="card-play" href="snake/index.html">▶ PLAY</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flappy -->
+      <div class="game-card reveal" style="transition-delay:0.15s">
+        <div class="card-tag">CHALLENGE</div>
+        <canvas id="flappyDemo" width="400" height="220" style="width:100%;height:220px;display:block;background:linear-gradient(135deg,#0d1117,#0a1520)"></canvas>
+        <div class="card-body">
+          <div class="card-number">02 / 03</div>
+          <div class="card-progress"><div class="card-progress-fill" style="width:70%"></div></div>
+          <h3 class="card-title">GAME FLAPPY BIRD</h3>
+          <p class="card-desc">Tap untuk terbang, hindari pipa-pipa berbahaya. Satu kesalahan = game over!</p>
+          <div class="card-footer">
+            <div class="card-meta">TAP · REFLEX</div>
+            <a class="card-play" href="flappy/index.html">▶ PLAY</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tower -->
+      <div class="game-card reveal" style="transition-delay:0.3s">
+        <div class="card-tag">STRATEGY</div>
+        <div style="width:100%;height:220px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d1117,#1a1008);position:relative;overflow:hidden;">
+          <canvas id="towerDemo" width="400" height="220" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+        </div>
+        <div class="card-body">
+          <div class="card-number">03 / 03</div>
+          <div class="card-progress"><div class="card-progress-fill" style="width:60%"></div></div>
+          <h3 class="card-title">GAME TOWER</h3>
+          <p class="card-desc">Bangun menara setinggi mungkin dengan menumpuk balok secara presisi. Uji ketelitianmu!</p>
+          <div class="card-footer">
+            <div class="card-meta">CLICK · PRECISION</div>
+            <a class="card-play" href="tower/index.html">▶ PLAY</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Feature Banner -->
+  <div class="feature-banner reveal">
+    <div>
+      <div class="feature-tag">▶ TENTANG SMKTAG</div>
+      <h2 class="feature-title">DIBUAT DENGAN<br><span style="color:var(--neon-cyan)">SEMANGAT</span> &<br>KODE</h2>
+      <p class="feature-desc">Koleksi game JavaScript yang dibuat oleh siswa Rekayasa Perangkat Lunak SMK 17 Agustus 1945 Surabaya. Belajar coding, berkreasi, dan bersenang-senang!</p>
+      <a href="#games" class="btn-primary">EXPLORE ALL GAMES</a>
+    </div>
+    <div class="feature-visual">
+      <div class="feature-stat-box">
+        <span class="num">JS</span>
+        <span class="lbl">Language</span>
+      </div>
+      <div class="feature-stat-box">
+        <span class="num">HTML5</span>
+        <span class="lbl">Platform</span>
+      </div>
+      <div class="feature-stat-box">
+        <span class="num">RPL</span>
+        <span class="lbl">Jurusan</span>
+      </div>
+      <div class="feature-stat-box">
+        <span class="num">2022</span>
+        <span class="lbl">Released</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <div class="footer-logo">SMKTAG</div>
+    <div class="footer-copy">© 2022 REKAYASA PERANGKAT LUNAK · SMK 17 AGUSTUS 1945 SURABAYA</div>
+    <div class="footer-tech">
+      <div class="tech-badge">HTML5</div>
+      <div class="tech-badge">CSS3</div>
+      <div class="tech-badge">JS</div>
+    </div>
+  </footer>
+
+  <script>
+    // ─── LOADER ───
+    const loaderFill = document.getElementById('loaderFill');
+    const loaderPct  = document.getElementById('loaderPct');
+    const loader     = document.getElementById('loader');
+    let pct = 0;
+    const msgs = ['LOADING ASSETS...','COMPILING SCRIPTS...','RENDERING ENGINE...','LAUNCHING...'];
+    const loaderText = loader.querySelector('.loader-text');
+    const loaderInt = setInterval(() => {
+      pct += Math.random() * 18 + 4;
+      if (pct >= 100) pct = 100;
+      loaderFill.style.width = pct + '%';
+      loaderPct.textContent  = Math.floor(pct) + '%';
+      loaderText.textContent = msgs[Math.min(Math.floor(pct/25), 3)];
+      if (pct >= 100) {
+        clearInterval(loaderInt);
+        setTimeout(() => { loader.classList.add('hidden'); }, 400);
+      }
+    }, 80);
+
+    // ─── Cursor ───
+    const cursor = document.getElementById('cursor');
+    const dot = document.getElementById('cursorDot');
+    let mx = 0, my = 0, cx = 0, cy = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = (mx - 3) + 'px';
+      dot.style.top  = (my - 3) + 'px';
+    });
+
+    function animateCursor() {
+      cx += (mx - cx - 10) * 0.12;
+      cy += (my - cy - 10) * 0.12;
+      cursor.style.left = cx + 'px';
+      cursor.style.top  = cy + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => { cursor.style.transform = 'scale(2)'; cursor.style.borderColor = 'var(--neon-pink)'; });
+      el.addEventListener('mouseleave', () => { cursor.style.transform = 'scale(1)'; cursor.style.borderColor = 'var(--neon-cyan)'; });
+    });
+
+    // ─── Floating pixels ───
+    const pixelContainer = document.getElementById('pixels');
+    const colors = ['#00f5ff', '#ff006e', '#ffd600', '#39ff14'];
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement('div');
+      p.className = 'pixel-float';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.width = p.style.height = (4 + Math.random() * 8) + 'px';
+      p.style.animationDuration = (8 + Math.random() * 15) + 's';
+      p.style.animationDelay = (-Math.random() * 20) + 's';
+      pixelContainer.appendChild(p);
+    }
+
+    // ─── Sound bars ───
+    const sbContainer = document.getElementById('soundBars');
+    for (let i = 0; i < 18; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'sound-bar';
+      bar.style.height = (8 + Math.random() * 32) + 'px';
+      bar.style.animationDuration = (0.4 + Math.random() * 0.8) + 's';
+      bar.style.animationDelay = (Math.random() * 0.6) + 's';
+      const hue = Math.random() > 0.7 ? 'var(--neon-pink)' : 'var(--neon-cyan)';
+      bar.style.background = hue;
+      bar.style.boxShadow = `0 0 6px ${hue}`;
+      sbContainer.appendChild(bar);
+    }
+
+    // ─── Typewriter ───
+    const phrases = [
+      'GAME COLLECTION · BUILT WITH CODE · PLAY IN BROWSER',
+      'SNAKE · FLAPPY BIRD · TOWER — PICK YOUR GAME',
+      'PURE JAVASCRIPT · HTML5 CANVAS · NO PLUGINS',
+    ];
+    let phraseIdx = 0, charIdx = 0, deleting = false;
+    const tw = document.getElementById('typewriter');
+
+    function typeLoop() {
+      const cur = phrases[phraseIdx];
+      if (!deleting) {
+        charIdx++;
+        tw.textContent = cur.slice(0, charIdx);
+        if (charIdx === cur.length) { deleting = true; setTimeout(typeLoop, 2200); return; }
+        setTimeout(typeLoop, 55);
+      } else {
+        charIdx--;
+        tw.textContent = cur.slice(0, charIdx);
+        if (charIdx === 0) { deleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; setTimeout(typeLoop, 400); return; }
+        setTimeout(typeLoop, 28);
+      }
+    }
+    setTimeout(typeLoop, 1200);
+
+    // ─── Nav logo random glitch flash ───
+    const navLogo = document.getElementById('navLogo');
+    function scheduleGlitch() {
+      const delay = 4000 + Math.random() * 8000;
+      setTimeout(() => {
+        navLogo.classList.add('glitching');
+        setTimeout(() => { navLogo.classList.remove('glitching'); scheduleGlitch(); }, 320);
+      }, delay);
+    }
+    scheduleGlitch();
+
+    // ─── Scroll reveal ───
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ─── Particle burst system ───
+    const pCanvas = document.getElementById('particleCanvas');
+    const pCtx = pCanvas.getContext('2d');
+    pCanvas.width  = window.innerWidth;
+    pCanvas.height = window.innerHeight;
+    window.addEventListener('resize', () => { pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight; });
+
+    let particles = [];
+
+    function spawnBurst(x, y, colorHex, count = 22) {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i + Math.random() * 0.4;
+        const speed = 2 + Math.random() * 5;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1,
+          decay: 0.018 + Math.random() * 0.02,
+          size: 2 + Math.random() * 4,
+          color: colorHex,
+        });
+      }
+    }
+
+    function animateParticles() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      particles = particles.filter(p => p.life > 0);
+      particles.forEach(p => {
+        p.x   += p.vx;
+        p.y   += p.vy;
+        p.vy  += 0.08;
+        p.life -= p.decay;
+        pCtx.globalAlpha = Math.max(0, p.life);
+        pCtx.fillStyle   = p.color;
+        pCtx.shadowColor = p.color;
+        pCtx.shadowBlur  = 8;
+        pCtx.fillRect(p.x, p.y, p.size, p.size);
+      });
+      pCtx.globalAlpha = 1;
+      pCtx.shadowBlur  = 0;
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Attach burst to card hovers
+    const burstColors = ['#00f5ff', '#ff006e', '#ffd600', '#39ff14'];
+    document.querySelectorAll('.game-card').forEach((card, idx) => {
+      card.addEventListener('mouseenter', e => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top;
+        spawnBurst(cx, cy, burstColors[idx % burstColors.length], 20);
+      });
+    });
+
+    // Burst on CTA buttons too
+    document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+      btn.addEventListener('click', e => {
+        spawnBurst(e.clientX, e.clientY, '#00f5ff', 30);
+      });
+    });
+
+    // ─── 3D Tilt on cards ───
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect  = card.getBoundingClientRect();
+        const cx    = rect.left + rect.width  / 2;
+        const cy    = rect.top  + rect.height / 2;
+        const dx    = (e.clientX - cx) / (rect.width  / 2);
+        const dy    = (e.clientY - cy) / (rect.height / 2);
+        const rotX  = -dy * 8;
+        const rotY  =  dx * 8;
+        card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px) scale(1.02)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+        card.style.transition = 'transform 0.5s ease';
+        setTimeout(() => { card.style.transition = ''; }, 500);
+      });
+    });
+
+    // ─── Snake demo canvas ───
+    (function() {
+      const canvas = document.getElementById('snakeDemo');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      canvas.height = 220;
+
+      const CELL = 16;
+      let snake = [{x:8,y:7},{x:7,y:7},{x:6,y:7}];
+      let dir = {x:1,y:0};
+      let food = {x:14,y:5};
+      let t = 0;
+
+      const dirs = [{x:1,y:0},{x:0,y:1},{x:-1,y:0},{x:0,y:-1}];
+      let dirIdx = 0;
+      let trail = [];
+
+      function drawSnake() {
+        const W = Math.floor(canvas.width/CELL);
+        const H = Math.floor(canvas.height/CELL);
+
+        // Fade trail
+        ctx.fillStyle = 'rgba(5,8,16,0.3)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        // Grid
+        ctx.strokeStyle = 'rgba(0,245,255,0.04)';
+        ctx.lineWidth = 0.5;
+        for(let x=0;x<W;x++) { ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,canvas.height); ctx.stroke(); }
+        for(let y=0;y<H;y++) { ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(canvas.width,y*CELL); ctx.stroke(); }
+
+        if(t % 8 === 0) {
+          const head = snake[0];
+          const newHead = {x: head.x + dir.x, y: head.y + dir.y};
+          if(newHead.x < 0) newHead.x = W-1;
+          if(newHead.x >= W) newHead.x = 0;
+          if(newHead.y < 0) newHead.y = H-1;
+          if(newHead.y >= H) newHead.y = 0;
+
+          if(newHead.x === food.x && newHead.y === food.y) {
+            food = {x: Math.floor(Math.random()*(W-2))+1, y: Math.floor(Math.random()*(H-2))+1};
+            // Eat flash
+            trail.push({x: food.x*CELL+CELL/2, y: food.y*CELL+CELL/2, r: 0, maxR: 40, life: 1});
+          } else {
+            snake.pop();
+          }
+          snake.unshift(newHead);
+
+          if(t % 40 === 0) {
+            dirIdx = (dirIdx + (Math.random() > 0.5 ? 1 : -1) + 4) % 4;
+            dir = dirs[dirIdx];
+          }
+        }
+
+        // Draw trail ripples
+        trail = trail.filter(tr => tr.life > 0);
+        trail.forEach(tr => {
+          tr.r += 1.5; tr.life -= 0.05;
+          ctx.beginPath();
+          ctx.arc(tr.x, tr.y, tr.r, 0, Math.PI*2);
+          ctx.strokeStyle = `rgba(255,0,110,${tr.life * 0.6})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+
+        // Draw snake
+        snake.forEach((seg, i) => {
+          const alpha = 1 - i / snake.length * 0.6;
+          ctx.fillStyle = i === 0 ? '#00f5ff' : `rgba(0,245,255,${alpha * 0.8})`;
+          ctx.shadowColor = '#00f5ff';
+          ctx.shadowBlur  = i === 0 ? 20 : 6;
+          ctx.fillRect(seg.x*CELL+1, seg.y*CELL+1, CELL-2, CELL-2);
+          ctx.shadowBlur  = 0;
+        });
+
+        // Food — pulsing
+        const pulse = 0.5 + 0.5 * Math.sin(t * 0.15);
+        ctx.fillStyle = '#ff006e';
+        ctx.shadowColor = '#ff006e';
+        ctx.shadowBlur  = 10 + pulse * 20;
+        ctx.fillRect(food.x*CELL+2, food.y*CELL+2, CELL-4, CELL-4);
+        ctx.shadowBlur  = 0;
+
+        t++;
+        requestAnimationFrame(drawSnake);
+      }
+      drawSnake();
+    })();
+
+    // ─── Flappy demo canvas ───
+    (function() {
+      const canvas = document.getElementById('flappyDemo');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      canvas.height = 220;
+
+      let bird = { y: 110, vy: -2, flap: 0 };
+      let pipes = [];
+      let t = 0;
+      let score = 0;
+      let particles = [];
+
+      function spawnPipe() {
+        const gap = 70;
+        const topH = 40 + Math.random() * 80;
+        pipes.push({ x: canvas.width, topH, botY: topH + gap });
+      }
+
+      function drawFlappy() {
+        // Trail fade
+        ctx.fillStyle = 'rgba(5,8,16,0.25)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        // Stars
+        for(let i=0;i<20;i++) {
+          const sx = ((i*137 + t*0.3) % canvas.width);
+          const sy = ((i*97)  % canvas.height);
+          const b  = 0.3 + 0.7 * Math.abs(Math.sin(t*0.02 + i));
+          ctx.fillStyle = `rgba(0,245,255,${b * 0.5})`;
+          ctx.fillRect(sx, sy, 1.5, 1.5);
+        }
+
+        // Particle trail behind bird
+        particles.push({ x: 60, y: bird.y, life: 0.8, vx: -1.5, vy: (Math.random()-0.5)*0.5, size: 4 });
+        particles = particles.filter(p => p.life > 0);
+        particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.life -= 0.07;
+          ctx.fillStyle = `rgba(255,214,0,${p.life * 0.6})`;
+          ctx.shadowColor = '#ffd600';
+          ctx.shadowBlur  = 6;
+          ctx.fillRect(p.x, p.y, p.size * p.life, p.size * p.life);
+          ctx.shadowBlur  = 0;
+        });
+
+        // Update bird
+        bird.vy   += 0.15;
+        bird.y    += bird.vy;
+        bird.flap  = Math.max(0, bird.flap - 0.1);
+
+        if(bird.y < 10) { bird.y=10; bird.vy=1; }
+        if(bird.y > canvas.height-20) { bird.y=10; bird.vy=-3; score=0; }
+
+        // Auto flap
+        if(bird.y > 130 || (pipes.length && pipes[0].x < 140 && (bird.y < pipes[0].topH+15 || bird.y > pipes[0].botY-15))) {
+          bird.vy = -4; bird.flap = 1;
+        }
+
+        // Pipes
+        if(t % 80 === 0) spawnPipe();
+        pipes = pipes.filter(p => p.x > -60);
+        pipes.forEach(p => {
+          p.x -= 2;
+          // Pipe glow gradient
+          const g = ctx.createLinearGradient(p.x, 0, p.x+30, 0);
+          g.addColorStop(0, 'rgba(57,255,20,0.9)');
+          g.addColorStop(1, 'rgba(57,255,20,0.5)');
+          ctx.fillStyle = g;
+          ctx.shadowColor = '#39ff14';
+          ctx.shadowBlur  = 12;
+          ctx.fillRect(p.x, 0, 30, p.topH);
+          ctx.fillRect(p.x, p.botY, 30, canvas.height - p.botY);
+          ctx.shadowBlur  = 0;
+          // Cap
+          ctx.fillStyle = 'rgba(57,255,20,0.7)';
+          ctx.fillRect(p.x-4, p.topH-8, 38, 8);
+          ctx.fillRect(p.x-4, p.botY,   38, 8);
+
+          if(Math.abs(p.x - 60) < 2) score++;
+        });
+
+        // Bird with wing flap
+        const wingAngle = Math.sin(t * 0.3) * 0.4 + bird.flap * 0.5;
+        ctx.save();
+        ctx.translate(60, bird.y);
+        ctx.rotate(Math.min(Math.max(bird.vy * 0.06, -0.4), 0.4));
+        // Body
+        ctx.fillStyle = '#ffd600';
+        ctx.shadowColor = '#ffd600';
+        ctx.shadowBlur  = 15;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 12, 9, 0, 0, Math.PI*2);
+        ctx.fill();
+        // Wing
+        ctx.fillStyle = 'rgba(255,214,0,0.6)';
+        ctx.beginPath();
+        ctx.ellipse(-4, -wingAngle*8, 8, 4, -wingAngle, 0, Math.PI*2);
+        ctx.fill();
+        // Eye
+        ctx.fillStyle = '#050810';
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(6, -2, 2.5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(7, -2.5, 1, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        // Score HUD
+        ctx.fillStyle = 'rgba(0,245,255,0.8)';
+        ctx.font = 'bold 10px Orbitron, monospace';
+        ctx.fillText(`SCORE: ${score}`, 10, 20);
+
+        t++;
+        requestAnimationFrame(drawFlappy);
+      }
+      drawFlappy();
+    })();
+
+    // ─── Tower demo canvas ───
+    (function() {
+      const canvas = document.getElementById('towerDemo');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      canvas.height = 220;
+
+      const W = canvas.width;
+      const blocks = [];
+      const BHEIGHT = 20;
+      const BWIDTH = 90;
+      let moving = { x: 10, y: 30, w: BWIDTH, dir: 1 };
+      let baseY = 200;
+      let t = 0;
+      let flashParticles = [];
+
+      for(let i=0;i<4;i++) {
+        blocks.push({ x: W/2 - BWIDTH/2 + (Math.random()-0.5)*20, y: baseY - i*BHEIGHT, w: BWIDTH - i*5 });
+      }
+
+      function drawTower() {
+        ctx.fillStyle = 'rgba(5,8,16,0.4)';
+        ctx.fillRect(0,0,W,canvas.height);
+
+        // Glow ground
+        const grd = ctx.createLinearGradient(0,baseY,0,canvas.height);
+        grd.addColorStop(0,'rgba(255,214,0,0.2)');
+        grd.addColorStop(1,'transparent');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0,baseY,W,canvas.height-baseY);
+
+        // Blocks
+        blocks.forEach((b,i) => {
+          const alpha = 0.4 + i/blocks.length*0.6;
+          // Gradient per block
+          const bg = ctx.createLinearGradient(b.x, b.y, b.x+b.w, b.y+BHEIGHT);
+          bg.addColorStop(0, `rgba(255,214,0,${alpha})`);
+          bg.addColorStop(1, `rgba(255,140,0,${alpha * 0.7})`);
+          ctx.fillStyle = bg;
+          ctx.shadowColor = '#ffd600';
+          ctx.shadowBlur  = 10;
+          ctx.fillRect(b.x, b.y, b.w, BHEIGHT-2);
+          ctx.shadowBlur  = 0;
+          // Top shine
+          ctx.fillStyle = `rgba(255,255,200,${alpha * 0.4})`;
+          ctx.fillRect(b.x+2, b.y+1, b.w-4, 3);
+        });
+
+        // Flash particles
+        flashParticles = flashParticles.filter(p => p.life > 0);
+        flashParticles.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life -= 0.04;
+          ctx.fillStyle = `rgba(255,214,0,${p.life})`;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+
+        // Moving block
+        moving.x += moving.dir * 1.8;
+        if(moving.x > W - moving.w || moving.x < 0) moving.dir *= -1;
+
+        // Scan line on moving block
+        const scanY = moving.y + ((t * 2) % (BHEIGHT));
+        ctx.fillStyle = 'rgba(0,245,255,0.9)';
+        ctx.shadowColor = '#00f5ff';
+        ctx.shadowBlur  = 18;
+        ctx.fillRect(moving.x, moving.y, moving.w, BHEIGHT-2);
+        ctx.shadowBlur  = 0;
+        // Highlight stripe
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fillRect(moving.x+2, moving.y+2, moving.w-4, 3);
+
+        // Place block every 3s
+        if(t % 180 === 0 && blocks.length < 10) {
+          const topBlock = blocks[blocks.length-1];
+          blocks.push({ x: moving.x, y: topBlock.y - BHEIGHT, w: moving.w });
+          moving.y = blocks[blocks.length-1].y - BHEIGHT;
+          // Spawn flash
+          for(let i=0;i<12;i++) {
+            flashParticles.push({
+              x: moving.x + Math.random()*moving.w,
+              y: topBlock.y,
+              vx: (Math.random()-0.5)*3,
+              vy: -2 - Math.random()*3,
+              size: 2+Math.random()*3,
+              life: 1
+            });
+          }
+        }
+        if(t % 180 === 0 && blocks.length >= 10) {
+          blocks.length = 0;
+          for(let i=0;i<4;i++) blocks.push({ x: W/2-BWIDTH/2, y: baseY - i*BHEIGHT, w: BWIDTH });
+          moving.y = 30;
+        }
+
+        // HUD
+        ctx.fillStyle = 'rgba(255,214,0,0.8)';
+        ctx.font = 'bold 9px Orbitron, monospace';
+        ctx.fillText(`LEVEL: ${blocks.length}`, 10, 18);
+
+        t++;
+        requestAnimationFrame(drawTower);
+      }
+      drawTower();
+    })();
+  </script>
+</body>
+</html>
