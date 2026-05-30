@@ -4,6 +4,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
+import javax.swing.JOptionPane;
 
 public class InventarisFrame extends JFrame {
     JTextField tfKode, tfNama, tfStok, tfHarga;
@@ -137,7 +138,7 @@ public class InventarisFrame extends JFrame {
         panelBtn.add(btnClear);
 
         add(panelBtn, BorderLayout.SOUTH);
-
+        
         btnTambah.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
