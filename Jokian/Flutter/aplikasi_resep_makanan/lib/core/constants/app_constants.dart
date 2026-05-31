@@ -5,8 +5,8 @@ class AppConstants {
 
   // ── Supabase ─────────────────────────────────────────────
   // GANTI dengan credentials Supabase Anda
-  static const String supabaseUrl = 'https://lmazcmizomnfacgduomk.supabase.co';
-  static const String supabaseAnonKey = 'sb_publishable_eBk7i_XdfaRKlXm6xM8rXA_7nGe_T4X';
+  static const String supabaseUrl = 'YOUR_SUPABASE_URL';
+  static const String supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
 
   // ── Storage ───────────────────────────────────────────────
   static const String recipeBucket = 'recipe_images';
